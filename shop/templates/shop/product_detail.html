@@ -1,0 +1,106 @@
+{% extends "immoshop/base_shop.html" %}
+{% load static i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if category %}{{ category.name }} {% else %} Products {% endif %}
+{% endblock %}
+
+{% block content %}
+{% if product %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6"> 
+            <div class="product-image">
+                {% if product_images|length >= 0 %}
+                    {% include './includes/carousel.html' %}
+                {% else %}
+                    <div class="product-image">
+                        <img src="{% static 'img/large_800x600_plan-apprt.jpg' %}" 
+                            alt="{{ product_images }}" 
+                            class="rounded-lg img-fluid mx-auto d-block" id="product-image" 
+                            style="height:800; widht:600">
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="product">
+                <h3>{{ product.name }}</h3>
+                <h6><a href="{{ product.category.get_absolute_url }}">{{ product.category }}</a></h6>
+                <p class="text-muted">Prix : {{ product.price }} DH</p>
+                <!--Specifications du produit -->
+                {% for spec in product.options %}  
+                    <p class="card-text">{{ spec.name }}  : {{ spec.value }} </p>
+                {% endfor %}
+                <p class="card-text"> Description :
+                     {{ product.description|safe|linebreaksbr }}</p>
+
+                <!-- action ajouter dans panier -->
+                <form action="{% url 'cart:cart_add_item' product.pk %}" method="post">
+                    {% csrf_token %}
+                    {{ cart_product_form }}
+                    <input type="submit" value="ajouter dans le panier" class="btn btn-warning">
+                </form>
+            </div>
+        </div>
+    </div><!-- /.row- -->
+
+ <!-- Contenu de l'image en plein écran -->
+    <div class="fullscreen-image" id="fullscreen-image">
+        <button class="btn btn-success close-btn">&times; close </button>
+        <img class="card-img-top" src="{% static  image.large_path.url %}" alt="Item 1">
+        <img src="{% static image.large_path.url %}" alt="{{ product.name }}" class="img-fluid">
+    </div>
+</div><!-- /.container -->
+ <!-- Script pour activer le plein écran -->
+    <!-- Script pour activer le plein écran -->
+{% block extra_js %}
+ <!-- Intégration de jQuery et Bootstrap JS (si nécessaire) -->
+  
+    <script>
+        $(document).ready(function() {
+            var fullscreenImage = $("#fullscreen-image");
+            var productImage = $("#product-image");
+
+            productImage.click(function() {
+                fullscreenImage.toggle(); // Afficher ou masquer l'image en plein écran
+            });
+
+            $(".close-btn").click(function() {
+                fullscreenImage.hide(); // Masquer l'image en plein écran
+            });
+        });
+    </script>
+
+{% endblock %}
+
+<style>
+/* Personnalisation des styles supplémentaires */
+.product-image img {
+    width: 100%;
+    height: auto;
+}
+.fullscreen-image {
+    display: none; /* Caché par défaut */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+}
+.fullscreen-image img {
+    max-width: 90%;
+    max-height: 90%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+</style>
+
+{% endif %}
+{% endblock %}

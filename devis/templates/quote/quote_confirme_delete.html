@@ -1,0 +1,14 @@
+
+{% extends 'quote_base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Confirmer la suppression</h1>
+    <p>Êtes-vous sûr de vouloir supprimer le devis {{ quote.numero }} ?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+        <a href="{% url 'quote:quote_detail' quote.pk %}" class="btn btn-secondary">Annuler</a>
+    </form>
+</div>
+{% endblock %}

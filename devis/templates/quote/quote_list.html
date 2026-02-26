@@ -1,0 +1,42 @@
+{% extends 'quote_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Liste des Devis</h1>
+    <a href="{% url 'quote:quote_create' %}" class="btn btn-primary mb-3">Nouveau Devis</a>
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Numéro</th>
+                <th>Client</th>
+                <th>Date de création</th>
+                <th>Montant total</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for quote in quotes %}
+            <tr>
+                <td>{{ quote.numero }}</td>
+                <td>{{ quote.client.nom }}</td>
+                <td>{{ quote.date_creation }}</td>
+                <td>{{ quote.montant_total }} €</td>
+                <td><span class="badge bg-{{ quote.get_statut_display|lower }}">{{ quote.get_statut_display }}</span></td>
+                <td>
+                    <a href="{% url 'quote:quote_detail' quote.pk %}" class="btn btn-sm btn-info">Détails</a>
+                    <a href="{% url 'quote:quote_update' quote.pk %}" class="btn btn-sm btn-warning">Modifier</a>
+                    <a href="{% url 'quote:quote_delete' quote.pk %}" class="btn btn-sm btn-danger">Supprimer</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">Aucun devis trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

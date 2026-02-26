@@ -1,0 +1,144 @@
+{% extends "customer/base_shop.html" %}
+{% load  static l10n %}
+
+{% block header %}
+{% endblock header %}
+
+{% block content %}
+    <div class="container row" id="app">
+        <div class="col-10">
+            <h3> [[ message ]] </h3>
+            <form class="d-flex" action="/admin/" method="post" @submit.prevent="">
+                    {% csrf_token %}
+                <input class="form-control me-2" v-model="filterKey" type="text" placeholder="saisie un mot de recherche" >
+                <input class="btn btn-outline-success" type="submit" value="Rechercher" />
+            </form>
+            <hr/>
+            <div v-if="sortedCustomers.length==0" scope="row"> 
+                <a class="btn btn-warning" href="{% url 'customer:client-create' %}">
+                    Entregistrer nouveau client
+                </a>
+            </div>
+
+            <table v-if="sortedCustomers.length > 0"  class="table table-striped">
+                <thead>
+                    <tr>
+                        
+                        <th scope="col"> 
+                           select
+                        </th>
+                        <th scope="col">ID</th>
+                        <th scope="col">Client</th>
+                        <th scope="col">Company</th>
+                    </tr>
+                </thead>
+                <tbody v-if="sortedCustomers">
+                    <tr v-for="(client, index) in sortedCustomers" :key=index>
+                        <td scope="col"> 
+                            <input type="checkbox" v-model="select"> </input> 
+                        </td>
+                        <td scope="row"> <a href="{% url 'customer:client-create' %}">
+                            [[ client.email ]] </a> </td>
+                        <td>
+                            <a :href='client.get_absolute_url'   target='_blanc'>
+                                [[ client.first_name ]] [[ client.last_name ]] 
+                            </a>  
+                        </td>
+                        <td> [[ client.company ]] </td>
+                        <td class='btn btn-warning' @click="redirect(client, 'update')" url=''> Modifier client </td>
+                        <td class='btn btn-warning' @click="redirect(client, 'select')" url=''> Selectionner client</td>
+                        <td v-if = "select" class='btn btn-warning' @click="redirect(client, 'checkout')" url=''> Checkout</td>
+                    </tr>
+                </tbody>
+            </table> 
+        </div>
+        <div class="col-2">
+            <img src="/media/upload/django-shop-logo.jpeg" width="50%" />
+        </div>
+    </div>
+{% endblock content %}
+
+{% block extra_js %}
+    <script>
+        var vm = new Vue({
+            el: "#app",
+            delimiters: ['[[', ']]'],
+            data: { 
+                message : "OK on est sous vue.js",
+                clients : [],
+                url : "",
+                filterKey : "",
+                sortedKey : "last_name",
+                sortBy : "last_name",
+                currentSort : "last_name",
+                order : -1 ,
+                client_found : false,
+                select : false,
+            },
+            //----
+            created(){
+                // `this` est une référence à l'instance de vm
+                console.log('this is message: ' + this.message)
+                this.load_clients()
+            },
+            //---
+            computed: {
+                // sinon 
+                sortedCustomers(){
+                    //--
+                    return this.clients.filter(client => client.last_name.includes(this.filterKey)).sort((a, b) =>  {
+                        if(a[this.currentSort] < b[this.currentSort]) return -1 * this.order
+                        if(a[this.currentSort] > b[this.currentSort]) return 1 * this.order
+                        return 0
+                    })
+                }
+            },
+            methods: {
+                redirect(client, action) {
+                    if (action ==='update' && client.get_absolute_url) {
+                        window.location.href = client.get_absolute_url;
+                    }else if( action==='select') {
+                        this.select=!this.select
+                        console.error("ce client est selectionner ", client.email);
+                    }else if( action==='checkout'){
+                        window.location.href = client.get_absolute_url;
+                    }
+                },
+                // Autres méthodes...
+
+                load_clients(){
+                    let url = `/client/api/v1/clients/`
+                    // ajax load
+                    fetch(url)
+                    .then(response => response.json())
+                    .then(json => {
+                        this.clients = json;
+                        
+                        })  
+                    .catch(err => {
+                        //console.log("erreur fetch load_clients", err)
+                        })
+                },
+                //-------
+                chercher_client(event){
+                    let url = `/client/`
+                    // ajax load
+                    fetch(url)
+                    .then(response => response.json())
+                    .then(json => {
+                        this.clients = json;
+                        //---
+                        console.log(" data = " + this.clients.length )
+                        })  
+                    .catch(err => {
+                        console.log("erreur fetch", err.msg);
+                        }
+                        )
+                },
+            }
+        });
+        // mount
+        vm.$mount('#app')
+    </script>
+{% endblock extra_js%}
+

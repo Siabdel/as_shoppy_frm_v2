@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+{% load i18n static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}E-sakani On-line Shop{% endblock %}</title>
+    <link rel="icon" href="{% static 'img/favicon.png' %}"/>
+       <!-- Intégration de Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400">
+</head>
+<body>
+{% include 'immoshop/navbar.html' %}
+
+<div class="container">
+    <div class="row" style="margin-top: 6%">
+         <button class="btn btn-info pull-right">
+            {% with totail_items=cart|length %}
+                {% if cart|length > 0 %}
+                    My Shopping Order:
+                    <a href="{% url "cart:cart_detail" %}" style="color: #ffffff">
+                        {{ totail_items }} item {{ totail_items|pluralize }}, DH {{ cart.get_total_price }}
+                    </a>
+                    {% else %}
+                    Your cart is empty.
+                {% endif %}
+            {% endwith %}
+         </button>
+    </div>
+</div>
+
+<div class="container-fluid" > 
+    {% if messages %}
+        <ul id="messages">
+            {% for message in messages %}
+            <li id="message_{{ forloop.counter }}">
+            <a href="#" onclick="$('#message_{{ forloop.counter }}').fadeOut(); return false;"><small>{% trans "clear" %}</small></a> {{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+     
+    {% block content %}{% endblock %}
+</div>
+
+{# Global javascript #}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Intégration de Bootstrap JS (si nécessaire) -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+
+ {# Override this in templates to add extra javascript #}
+ <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+
+ {% block extra_js %}{% endblock %}
+</body>
+</html>

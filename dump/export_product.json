@@ -1,0 +1,212 @@
+[
+{
+  "model": "product.product",
+  "pk": 1,
+  "fields": {
+    "polymorphic_ctype": 38,
+    "category": null,
+    "name": "Renault Megane TDI 110 CV",
+    "slug": "Renault-Megane-TDI-110-CV",
+    "description": "",
+    "price": "24000.00",
+    "regular_price": "24000.00",
+    "discount_price": "23999.98",
+    "available": true,
+    "stock": 12,
+    "created_at": "2024-07-08T21:49:15.670",
+    "updated_at": "2024-07-08T21:53:17.098",
+    "default_image": "upload/product_images/2024/07/S8-maxi-fiche-fiabilite-renault-megane-4-un-modele-a-risqu_eS4IrIW.jpg",
+    "in_stock": true,
+    "is_active": true,
+    "product_code": null,
+    "project": 1,
+    "product_name": null
+  }
+},
+{
+  "model": "product.product",
+  "pk": 2,
+  "fields": {
+    "polymorphic_ctype": 38,
+    "category": null,
+    "name": "Renault Clio RS 90 CV",
+    "slug": "Renault-Clio-RS-90-CV",
+    "description": "",
+    "price": "19400.00",
+    "regular_price": "19400.00",
+    "discount_price": "19399.88",
+    "available": true,
+    "stock": 22,
+    "created_at": "2024-07-08T21:49:15.672",
+    "updated_at": "2024-07-08T21:54:25.547",
+    "default_image": "upload/product_images/2024/07/S0-renault-voici-la-clio-rs-radicale-tant-attendue-379007_hVOOvZm.jpg",
+    "in_stock": true,
+    "is_active": true,
+    "product_code": null,
+    "project": 1,
+    "product_name": null
+  }
+},
+{
+  "model": "product.producttype",
+  "pk": 1,
+  "fields": {
+    "name": "Automobile Type",
+    "is_active": true
+  }
+},
+{
+  "model": "product.productspecification",
+  "pk": 1,
+  "fields": {
+    "product_type": 1,
+    "name": "Coulour"
+  }
+},
+{
+  "model": "product.productspecification",
+  "pk": 2,
+  "fields": {
+    "product_type": 1,
+    "name": "Energie"
+  }
+},
+{
+  "model": "product.productspecification",
+  "pk": 3,
+  "fields": {
+    "product_type": 1,
+    "name": "Puissance"
+  }
+},
+{
+  "model": "product.productspecificationvalue",
+  "pk": 1,
+  "fields": {
+    "polymorphic_ctype": 41,
+    "product": 2,
+    "specification": 1,
+    "value": "Jaune"
+  }
+},
+{
+  "model": "product.productspecificationvalue",
+  "pk": 2,
+  "fields": {
+    "polymorphic_ctype": 41,
+    "product": 2,
+    "specification": 2,
+    "value": "Gazoile"
+  }
+},
+{
+  "model": "product.productspecificationvalue",
+  "pk": 3,
+  "fields": {
+    "polymorphic_ctype": 41,
+    "product": 2,
+    "specification": 3,
+    "value": "90 CV"
+  }
+},
+{
+  "model": "product.productspecificationvalue",
+  "pk": 4,
+  "fields": {
+    "polymorphic_ctype": 41,
+    "product": 1,
+    "specification": 1,
+    "value": "Bleu"
+  }
+},
+{
+  "model": "product.productspecificationvalue",
+  "pk": 5,
+  "fields": {
+    "polymorphic_ctype": 41,
+    "product": 1,
+    "specification": 2,
+    "value": "Gazoile"
+  }
+},
+{
+  "model": "product.productspecificationvalue",
+  "pk": 6,
+  "fields": {
+    "polymorphic_ctype": 41,
+    "product": 1,
+    "specification": 3,
+    "value": "90 CV"
+  }
+},
+{
+  "model": "product.productimage",
+  "pk": 1,
+  "fields": {
+    "polymorphic_ctype": 42,
+    "title": null,
+    "slug": null,
+    "image": "upload/product_images/2024/07/S0-renault-voici-la-clio-rs-radicale-tant-attendue-379007_W3V8KkP.jpg",
+    "thumbnail_path": "/media/images/thumbnail_100x100_S0-renault-voici-la-clio-rs-radicale-tant-attendue-379007_W3V8KkP.jpg",
+    "large_path": "/media/images/large_800x600_S0-renault-voici-la-clio-rs-radicale-tant-attendue-379007_W3V8KkP.jpg",
+    "created_at": "2024-07-08T21:52:05.650",
+    "product": 2
+  }
+},
+{
+  "model": "product.productimage",
+  "pk": 2,
+  "fields": {
+    "polymorphic_ctype": 42,
+    "title": null,
+    "slug": null,
+    "image": "upload/product_images/2024/07/renault-clio-rs_mo1g5z2.jpg",
+    "thumbnail_path": "/media/images/thumbnail_100x100_renault-clio-rs_mo1g5z2.jpg",
+    "large_path": "/media/images/large_800x600_renault-clio-rs_mo1g5z2.jpg",
+    "created_at": "2024-07-08T21:52:05.651",
+    "product": 2
+  }
+},
+{
+  "model": "product.productimage",
+  "pk": 3,
+  "fields": {
+    "polymorphic_ctype": 42,
+    "title": null,
+    "slug": null,
+    "image": "upload/product_images/2024/07/annonce-LBC-megane-rs-ultime-orange-bd_ct9LPlp.jpg",
+    "thumbnail_path": "/media/images/thumbnail_100x100_annonce-LBC-megane-rs-ultime-orange-bd_ct9LPlp.jpg",
+    "large_path": "/media/images/large_800x600_annonce-LBC-megane-rs-ultime-orange-bd_ct9LPlp.jpg",
+    "created_at": "2024-07-08T21:52:05.652",
+    "product": 2
+  }
+},
+{
+  "model": "product.productimage",
+  "pk": 4,
+  "fields": {
+    "polymorphic_ctype": 42,
+    "title": null,
+    "slug": null,
+    "image": "upload/product_images/2024/07/S8-maxi-fiche-fiabilite-renault-megane-4-un-modele-a-risqu_RzOxW8b.jpg",
+    "thumbnail_path": "/media/images/thumbnail_100x100_S8-maxi-fiche-fiabilite-renault-megane-4-un-modele-a-risqu_RzOxW8b.jpg",
+    "large_path": "/media/images/large_800x600_S8-maxi-fiche-fiabilite-renault-megane-4-un-modele-a-risqu_RzOxW8b.jpg",
+    "created_at": "2024-07-08T21:53:17.133",
+    "product": 1
+  }
+},
+{
+  "model": "product.productimage",
+  "pk": 5,
+  "fields": {
+    "polymorphic_ctype": 42,
+    "title": null,
+    "slug": null,
+    "image": "upload/product_images/2024/07/annonce-LBC-megane-rs-ultime-orange-bd_kFG7QMB.jpg",
+    "thumbnail_path": "/media/images/thumbnail_100x100_annonce-LBC-megane-rs-ultime-orange-bd_kFG7QMB.jpg",
+    "large_path": "/media/images/large_800x600_annonce-LBC-megane-rs-ultime-orange-bd_kFG7QMB.jpg",
+    "created_at": "2024-07-08T21:53:17.135",
+    "product": 1
+  }
+}
+]

@@ -1,0 +1,202 @@
+.
+├── autocar
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── models.py
+│   ├── __pycache__
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── config
+│   ├── __init__.py
+│   ├── projects.py
+│   ├── __pycache__
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── core
+│   ├── addressing
+│   ├── base_product
+│   ├── base_shop
+│   ├── cart
+│   ├── deferred.py
+│   ├── fields.py
+│   ├── forms
+│   ├── __init__.py
+│   ├── mfilesupload
+│   ├── models
+│   ├── orders
+│   ├── profile
+│   ├── __pycache__
+│   ├── signals.py
+│   ├── taxonomy
+│   └── utils
+├── customs
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── __init__.py
+│   ├── models.py
+│   ├── __pycache__
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── data
+│   ├── db.sqlite3
+│   ├── export.sh
+│   ├── import.sh
+│   ├── migrate.sh
+│   ├── products.json
+│   └── project.json
+├── E-sakani.code-workspace
+├── immoshop
+│   ├── admin.py
+│   ├── api.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── __init__.py
+│   ├── models.py
+│   ├── __pycache__
+│   ├── serializers.py
+│   ├── shop
+│   ├── signals.py
+│   ├── static
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── invoices
+│   ├── admin.py
+│   ├── api_views.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── frent-end
+│   ├── __init__.py
+│   ├── models.py
+│   ├── __pycache__
+│   ├── serializers.py
+│   ├── signals.py
+│   ├── static
+│   ├── templates
+│   ├── tests
+│   ├── urls.py
+│   └── views.py
+├── manage.py
+├── media
+│   ├── images
+│   └── upload
+├── migrate.sh
+├── product
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── __init__.py
+│   ├── models.py
+│   ├── __pycache__
+│   ├── tests.py
+│   └── views.py
+├── project
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── __init__.py
+│   ├── models.py
+│   ├── __pycache__
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── pytest.ini
+├── README.md
+├── requirements.txt
+├── shop
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── models.py
+│   ├── __pycache__
+│   ├── signals.py
+│   ├── static
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── static
+│   ├── admin
+│   ├── css
+│   ├── dist
+│   ├── images
+│   ├── img
+│   ├── js
+│   ├── mapwidgets
+│   ├── media
+│   ├── MFU_Images
+│   ├── mptt
+│   ├── polymorphic
+│   ├── product_images
+│   ├── scss
+│   └── upload
+├── staticfiles
+├── templates
+│   ├── autocar
+│   ├── cart
+│   ├── immoshop__
+│   ├── msfilesupload
+│   ├── orders
+│   ├── product
+│   ├── project
+│   └── shop
+└── tree_project.lst
+
+65 directories, 81 files
+
+Migrations for 'shop':
+  shop/migrations/0001_initial.py
+    - Create model Customer
+    - Create model ShopCart
+    - Create model CartItem
+Migrations for 'product':
+  product/migrations/0001_initial.py
+    - Create model Product
+    - Create model ProductSpecification
+    - Create model ProductType
+    - Create model ProductSpecificationValue
+    - Add field product_type to productspecification
+    - Create model ProductImage
+  product/migrations/0002_initial.py
+    - Add field project to product
+Migrations for 'profile':
+  core/profile/migrations/0001_initial.py
+    - Create model Fonction
+    - Create model Service
+    - Create model UProfile
+    - Create model Societe
+    - Add field societe to service
+    - Create model ObjectPermission
+Migrations for 'project':
+  project/migrations/0001_initial.py
+    - Create model Partenaire
+    - Create model Project
+    - Create model ProjectImage
+  project/migrations/0002_initial.py
+    - Add field category to project
+    - Add field manager to project
+    - Add field polymorphic_ctype to project
+    - Add field societe to project
+    - Add field content_type to partenaire
+Migrations for 'taxonomy':
+  core/taxonomy/migrations/0001_initial.py
+    - Create model Category
+    - Create model Document
+    - Create model ProductAttribute
+    - Create model Tag
+    - Create model TaggedItem
+    - Create model Result
+    - Create model ProductAttributeValue
+    - Create model MPCategory
+    - Create model GDocument
+    - Create model Commentaire
+    - Create model Categoryy
+    - Create model Vote
+(envEsakani) django@debian-hpelite:~/Depots/www/Back-end/Django/envEsakani/django$ ./manage.py makemigrations customer
+System check identified some issues:
+
+WARNINGS:

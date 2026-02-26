@@ -1,0 +1,11 @@
+[
+{
+  "model": "profile.societe",
+  "pk": 1,
+  "fields": {
+    "parent": null,
+    "name": "Concession Automobile Renault France",
+    "description": "Concession Automobile Renault France"
+  }
+}
+]

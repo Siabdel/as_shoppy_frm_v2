@@ -1,0 +1,31 @@
+
+{% extends 'quote_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h2>Créer un nouveau devis</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <h3>Éléments du devis</h3>
+    {{ items.management_form }}
+    <table class="table">
+        {% for item_form in items.forms %}
+            <tr class="item-form">
+                <td>{{ item_form.product|as_crispy_field }}</td>
+                <td>{{ item_form.quantity|as_crispy_field }}</td>
+                <td>{{ item_form.price|as_crispy_field }}</td>
+                <td>{{ item_form.rate|as_crispy_field }}</td>
+                <td>{{ item_form.tax|as_crispy_field }}</td>
+                <td>{% if item_form.instance.pk %}{{ item_form.DELETE|as_crispy_field }}{% endif %}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+</form>
+
+<script>
+    // JavaScript pour ajouter dynamiquement de nouveaux éléments de formulaire
+    // (à implémenter si nécessaire)
+</script>
+{% endblock %}

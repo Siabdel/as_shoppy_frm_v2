@@ -1,0 +1,16 @@
+[
+{
+  "model": "taxonomy.mpcategory",
+  "pk": 1,
+  "fields": {
+    "name": "Automobile",
+    "slug": "automobile",
+    "is_active": true,
+    "parent": null,
+    "lft": 1,
+    "rght": 2,
+    "tree_id": 1,
+    "level": 0
+  }
+}
+]

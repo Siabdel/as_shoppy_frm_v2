@@ -1,0 +1,25 @@
+{% extends "immoshop/base_shop.html" %}
+{% load static i18n %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+
+    <h1>Create Account</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_form_errors }}
+        {{ form|crispy }}
+
+        <h2>Custom Information</h2>
+        {{ formset.management_form }}
+        {% for form in formset %}
+            {{ form|crispy }}
+            <br/> 
+        {% endfor %}
+
+        <button class="btn btn-succes btn-block"  type="submit">Create Account</button>
+    </form>
+
+{% endblock %}
+ 

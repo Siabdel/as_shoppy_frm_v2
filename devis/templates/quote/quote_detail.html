@@ -1,0 +1,28 @@
+{% extends 'quote_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Détails du Devis</h1>
+    <div class="card">
+        <div class="card-header">
+            Devis {{ quote.numero }}
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Client: {{ quote.client.nom }}</h5>
+            <p class="card-text">Date de création: {{ quote.date_creation }}</p>
+            <p class="card-text">Date d'expiration: {{ quote.date_expiration }}</p>
+            <p class="card-text">Montant total: {{ quote.montant_total }} €</p>
+            <p class="card-text">Statut: <span class="badge bg-{{ quote.get_statut_display|lower }}">{{ quote.get_statut_display }}</span></p>
+            <p class="card-text">Description: {{ quote.description|linebreaks }}</p>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'quote:quote_update' quote.pk %}" class="btn btn-warning">Modifier</a>
+            <a href="{% url 'quote:quote_delete' quote.pk %}" class="btn btn-danger">Supprimer</a>
+            {% if quote.statut == 'accepté' %}
+            <a href="{% url 'quote:convert_quote_to_invoice' quote.pk %}" class="btn btn-success">Convertir en Facture</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

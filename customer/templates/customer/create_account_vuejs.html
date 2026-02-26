@@ -1,0 +1,158 @@
+{% extends "customer/base_shop.html" %}
+{% load static i18n %}
+{% load crispy_forms_tags %}
+
+{% block content  %}
+
+<div id="app">
+    <h3 class="bg-gradient text-danger"> [[ message_err ]] </h3>
+    <form method="post" id="id_account_form">
+        {% csrf_token %}
+        <div v-show="currentStep === 1">
+            <h2>Step 1: Account Information</h2>
+            {{ form.non_form_errors }}
+            {{ form|crispy }}
+        </div>
+        <div v-show="currentStep === 2">
+            <h2>Step 2: Custom Information</h2>
+            {{ formset.management_form }}
+            {% for form in formset.forms %}
+                <div> {{ form|crispy }} </div>
+            {% endfor %}
+        </div>
+        <button class="btn btn-warning btn-block" v-if="currentStep > 1" @click.prevent="prevStep">Previous</button>
+        <button class="btn btn-warning btn-block" v-if="currentStep < totalSteps" type="button" @click.prevent="nextStep">Next</button>
+        <button class="btn btn-warning btn-block" @click.prevent="submitForm" 
+                    v-else type="submit">Create Account</button>
+    </form>
+</div>
+
+{% endblock  %}
+
+{% block  extra_js %}
+<script>
+    var vm = new Vue({
+        el: '#app',
+        delimiters: ['[[', ']]'],
+        data(){
+            return{
+                msg : "Create Account vue.js",
+                error : "",
+                userFound : "",
+                currentStep: 1,
+                totalSteps: 2,
+            }
+        },
+        created(){
+            if(this.findAccount(23)){
+                console.log("user found him !!!")
+            };
+        },
+        //- 
+        computed:{
+            // 
+            message_err(){
+                if(this.error !== "" ){
+                    return this.error
+                }
+            }
+        },
+
+        methods: {
+            form1_validate(){
+                const email = $('#id_email');
+                const passwd1 = $('#id_password1');
+                const passwd2 = $('#id_password2');
+                //console.log("email = ", passwd1.val())
+                if(email.val() !== "" && passwd1.val() && passwd2.val()){
+                    this.error = ""
+                    return true
+                } 
+                else if(email.val() === ""){ 
+                    //this.error = "merci de corriger ces erreurs "
+                    this.error = "Saisir votre email !! "
+                    email.focus()
+                    return false
+                }
+                else if(passwd1.val() === ""){ 
+                    //this.error = "merci de corriger ces erreurs "
+                    this.error = "Saisir votre mot de passe !! "
+                    passwd1.focus()
+                    return false
+                }
+                else if(passwd2.val() === "" || passwd1.val() != passwd2.val()){ 
+                    //this.error = "merci de corriger ces erreurs "
+                    this.error = "confirmer votre mot de passe !! "
+                    passwd2.focus()
+                    return false
+                }
+                return true
+            },
+
+            customFormValidate() {
+                // Vérifiez les champs pour chaque formulaire dans custom_formset.forms
+                let isValid = true;
+                console.log("customFormValidate =")
+                $('#id_account_form input[type!="hidden"]').each(function() {
+                    var id = $(this).attr('id');
+                    var name = $(this).attr('name');
+
+                    if ($(this).val() === "") {
+                        //console.log("submit form =", name, id)
+                        // Affichez un message d'erreur approprié
+                        this.error = "Veuillez remplir tous les champs. coriger le champ=",  name;
+                        isValid = false;
+                        return false; // Sortez de la boucle each
+                    }
+                });
+                return isValid;
+            },
+            nextStep() {
+                //console.log("currentStep = ", this.currentStep)
+                if (this.currentStep === 1 && this.form1_validate()) {
+                    // si valid
+                    this.currentStep++;
+                } 
+                else if(this.currentStep === 2) {
+                    // Valider le formulaire CustomFormSet
+                    if(this.form1_validate()){
+                        return true
+                    }
+                }
+            },
+            prevStep() {
+                this.currentStep--;
+            },
+            submitForm() {
+                // Cette méthode ne sera appelée que si les deux formulaires sont valides
+                // Valider le formulaire CustomFormSet
+                const first_name = $('id_custom-0-first-name')
+                //console.log("submit form =", first_name)
+                //--
+                if (this.customFormValidate()) {
+                    console.log("submit formulaire est valid *** = ", first_name)
+                    $('form').submit();
+                }else {
+                    this.currentStep = 2
+                    first_name.focus()
+                    //console.log("submit form_invalid =", first_name)
+                }
+            },
+
+            findAccount(user_id){
+                const url = 'http://localhost:8000/shop/api/user/23/'
+
+                fetch(url)
+                .then(response => response.json())
+                .then( data => {
+                this.userFound = data
+                console.log("data load = ",this.userFound.id )
+                } )
+                .catch(error => console.log("erreur = " + error));
+            },
+        }
+    });
+</script>
+
+{% endblock  %}
+

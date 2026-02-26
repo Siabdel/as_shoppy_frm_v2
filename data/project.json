@@ -1,0 +1,208 @@
+[
+{
+  "model": "product.product",
+  "pk": 1,
+  "fields": {
+    "polymorphic_ctype": 39,
+    "name": "appart-f3-e2-vue-salon",
+    "slug": "appart-f3-e2-vue-salon",
+    "description": "appart-f3-e2-vue-salon",
+    "price": "330000.00",
+    "regular_price": "330000.00",
+    "discount_price": "330000.00",
+    "available": true,
+    "stock": 11,
+    "created_at": "2024-04-11T21:09:46.098",
+    "updated_at": "2024-04-11T21:33:38.416",
+    "default_image": "upload/product_images/2024/04/appartement-javea-avec-terrasse-avec-jardin-avec-internet-_QIhl7HU.jpg",
+    "in_stock": true,
+    "is_active": true,
+    "product_code": null,
+    "category": null
+  }
+},
+{
+  "model": "product.mpcategory",
+  "pk": 1,
+  "fields": {
+    "name": "Gestion Immobiliere",
+    "slug": "gestion-immobiliere",
+    "is_active": true,
+    "parent": null,
+    "lft": 1,
+    "rght": 2,
+    "tree_id": 1,
+    "level": 0
+  }
+},
+{
+  "model": "product.producttype",
+  "pk": 1,
+  "fields": {
+    "name": "Immobiliere",
+    "is_active": true
+  }
+},
+{
+  "model": "product.productspecification",
+  "pk": 1,
+  "fields": {
+    "product_type": 1,
+    "name": "Superficie"
+  }
+},
+{
+  "model": "product.productspecification",
+  "pk": 2,
+  "fields": {
+    "product_type": 1,
+    "name": "nombre de pieces"
+  }
+},
+{
+  "model": "product.productspecification",
+  "pk": 3,
+  "fields": {
+    "product_type": 1,
+    "name": "orientation"
+  }
+},
+{
+  "model": "product.productspecificationvalue",
+  "pk": 1,
+  "fields": {
+    "polymorphic_ctype": 38,
+    "product": 1,
+    "specification": 1,
+    "value": "75 M2"
+  }
+},
+{
+  "model": "product.productspecificationvalue",
+  "pk": 2,
+  "fields": {
+    "polymorphic_ctype": 38,
+    "product": 1,
+    "specification": 2,
+    "value": "3"
+  }
+},
+{
+  "model": "product.productspecificationvalue",
+  "pk": 3,
+  "fields": {
+    "polymorphic_ctype": 38,
+    "product": 1,
+    "specification": 3,
+    "value": "SUD-OUEST"
+  }
+},
+{
+  "model": "product.productimage",
+  "pk": 1,
+  "fields": {
+    "polymorphic_ctype": 37,
+    "title": null,
+    "slug": null,
+    "image": "upload/product_images/2024/04/projet_imm001_EONZWRM.webp",
+    "thumbnail_path": "/media/images/thumbnail_100x100_projet_imm001_EONZWRM.webp",
+    "large_path": "/media/images/large_800x600_projet_imm001_EONZWRM.webp",
+    "created_at": "2024-04-11T21:12:22.497",
+    "product": 1
+  }
+},
+{
+  "model": "product.productimage",
+  "pk": 2,
+  "fields": {
+    "polymorphic_ctype": 37,
+    "title": null,
+    "slug": null,
+    "image": "upload/product_images/2024/04/projet_imm003_sISUcfz.webp",
+    "thumbnail_path": "/media/images/thumbnail_100x100_projet_imm003_sISUcfz.webp",
+    "large_path": "/media/images/large_800x600_projet_imm003_sISUcfz.webp",
+    "created_at": "2024-04-11T21:12:22.499",
+    "product": 1
+  }
+},
+{
+  "model": "product.productimage",
+  "pk": 3,
+  "fields": {
+    "polymorphic_ctype": 37,
+    "title": null,
+    "slug": null,
+    "image": "upload/product_images/2024/04/projet_imm004_HIr2lwb.webp",
+    "thumbnail_path": "/media/images/thumbnail_100x100_projet_imm004_HIr2lwb.webp",
+    "large_path": "/media/images/large_800x600_projet_imm004_HIr2lwb.webp",
+    "created_at": "2024-04-11T21:12:22.500",
+    "product": 1
+  }
+},
+{
+  "model": "product.project",
+  "pk": 1,
+  "fields": {
+    "polymorphic_ctype": 8,
+    "title": "les orangers Alassil",
+    "slug": "les-orangers-alassil",
+    "description": "Venez trouver votre futur résidence comme vous l'avez imaginé dans vos rêves.\r\n\r\nLa nouvelle signature du Groupe Alassil dans le quartier Val-Fleury vous propose des appartements haut standing aux finitions irréprochables.\r\n\r\nEnsoleillement parfait toute la journée même en hiver.\r\n\r\nGrâce à son positionnement et à la hauteur basse des constructions avoisinantes l'ensoleillement y est garantie toute la journée et toute l'année même en hiver.\r\n\r\nLe projet offre aussi des bureaux et des magasins convenant à divers activités commerciales.",
+    "author": null,
+    "manager": null,
+    "status": "OPEN",
+    "visibilite": "P",
+    "created": "2024-04-11T21:08:11.023",
+    "due_date": "2026-04-11T21:08:01",
+    "start_date": "2024-04-11T21:06:54",
+    "end_date": null,
+    "comment": "",
+    "default_image": "upload/product_images/2024/04/projet_imm001.jpg",
+    "societe": 1,
+    "category": 1
+  }
+},
+{
+  "model": "product.project",
+  "pk": 2,
+  "fields": {
+    "polymorphic_ctype": 8,
+    "title": "Baleria Marrakech",
+    "slug": "baleria-marrakech",
+    "description": "BALERIA MARRAKECH met à votre disposition une deuxième tranche avec deux types de villas, isolée et jumelés, joignant fonctionnalité et confort.\r\n\r\nLe terrain dudit projet se situe dans le prolongement de l’Avenue Mohamed VI dans la zone touristique d’Agdal, à proximité du centre commercial « Al Mazar », du cinéma « Megarama », Morocco Mall, des jardins de l’Agdal et de plusieurs complexes touristiques.\r\n\r\nDeux types de villas modernes avec une superficie entre 500m² et 900 m².\r\n\r\nLe rez de chaussée, d’une superficie de 150m² à 180 m² est conçu de façon claire et fonctionnelle, privilégiant les espaces ouverts avec vue sur jardin et piscine privative.\r\n\r\nIl s'articule autour d’un salon, d'une salle à manger, d'une cuisine et d'une chambre d’amis.\r\n\r\nL’étage vous invite à découvrir quatre grandes suites bénéficiant chacune de sa propre salle de bain et son propre dressing afin d’assurer un confort optimal aux propriétaires de la villa.\r\n\r\nToutes les suites donnent sur de larges terrasses autour de la villa afin de profiter au maximum de la belle vue qu’offre le site.\r\n\r\nConcernant les services de proximité, la résidence est dotée, d’un centre commercial, supermarché, SPA, pharmacie et services de proximité seront à la disposition des résidents au sein du projet.",
+    "author": null,
+    "manager": null,
+    "status": "OPEN",
+    "visibilite": "P",
+    "created": "2024-04-12T09:15:13.375",
+    "due_date": "2025-11-12T09:14:52",
+    "start_date": "2024-04-12T09:13:11",
+    "end_date": null,
+    "comment": "",
+    "default_image": "upload/product_images/2024/04/project_001.jpg",
+    "societe": 1,
+    "category": 1
+  }
+},
+{
+  "model": "product.project",
+  "pk": 3,
+  "fields": {
+    "polymorphic_ctype": 8,
+    "title": "projer 2 Les résidences Kotbi",
+    "slug": "projer-2-les-residences-kotbi",
+    "description": "Au cœur de la Ville Haute, le quartier historique le plus animé de la ville de Kénitra à 5 min de la nouvelle gare du LGV et à 10 min de l’autoroute Rabat-Tanger , Les Résidences KOTBI propose un concept d’immeuble contemporain et unique dans toute la ville.\r\n\r\nCe projet propose, en effet à quelques acquéreurs privilégiés deux appartements de prestige par niveau qui s’insèrent dans un cadre de vie agréable et sécurisé.\r\n\r\nAvec sa façade paysagère, son patios d’accueil animée d’ambiances, ses grandes baies vitrées, ses terrasses extérieures ou la végétation est omniprésente, le projet s’inscrit dans le cadre d’un respect du haut standing ou les normes thermiques, de sécurité et de confort sont au rendez-vous.\r\n\r\nTous les appartements bénéficient d’agencement de qualité et sont dotés de deux façades opposées et de belles terrasses pour une luminosité maximale.",
+    "author": null,
+    "manager": 1,
+    "status": "OPEN",
+    "visibilite": "P",
+    "created": "2024-04-12T09:24:48.774",
+    "due_date": "2025-10-12T09:24:22",
+    "start_date": "2024-04-12T09:23:05",
+    "end_date": null,
+    "comment": "",
+    "default_image": "upload/product_images/2024/04/projet_imm001_TWfOeSp.jpg",
+    "societe": 1,
+    "category": null
+  }
+}
+]

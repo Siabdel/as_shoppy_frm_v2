@@ -1,0 +1,52 @@
+
+Migrations for 'customer':
+  customer/migrations/0001_initial.py
+    - Create model CustomUser
+    - Create model Customer
+Migrations for 'product':
+  product/migrations/0001_initial.py
+    - Create model Product
+    - Create model ProductSpecification
+    - Create model ProductType
+    - Create model ProductSpecificationValue
+    - Add field product_type to productspecification
+    - Create model ProductImage
+  product/migrations/0002_initial.py
+    - Add field project to product
+Migrations for 'profile':
+  core/profile/migrations/0001_initial.py
+    - Create model Fonction
+    - Create model Service
+    - Create model UProfile
+    - Create model Societe
+    - Add field societe to service
+    - Create model ObjectPermission
+Migrations for 'project':
+  project/migrations/0001_initial.py
+    - Create model Partenaire
+    - Create model Project
+    - Create model ProjectImage
+  project/migrations/0002_initial.py
+    - Add field category to project
+    - Add field manager to project
+    - Add field polymorphic_ctype to project
+    - Add field societe to project
+    - Add field content_type to partenaire
+Migrations for 'shop':
+  shop/migrations/0001_initial.py
+    - Create model ShopCart
+    - Create model CartItem
+Migrations for 'taxonomy':
+  core/taxonomy/migrations/0001_initial.py
+    - Create model Category
+    - Create model Document
+    - Create model ProductAttribute
+    - Create model Tag
+    - Create model TaggedItem
+    - Create model Result
+    - Create model ProductAttributeValue
+    - Create model MPCategory
+    - Create model GDocument
+    - Create model Commentaire
+    - Create model Categoryy
+    - Create model Vote

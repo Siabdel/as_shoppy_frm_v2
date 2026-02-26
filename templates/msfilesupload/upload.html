@@ -1,0 +1,17 @@
+{% extends 'base_image.html' %}
+{% load i18n static %}
+
+{% block content %}
+   <div class="container-fluid">
+    <title>Multiple File Uploads</title>
+    <div class="container center">
+        <form method="POST" class="form-control" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="formFile" class="form-label">Upload Files Here</label>
+              {{form}}
+            </div>
+            <button type="submit input-control" class="btn btn-warning btn-lg">Upload</button>
+        </form>
+    </div>
+{% endblock %}

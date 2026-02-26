@@ -1,0 +1,29 @@
+{% extends 'base_image.html' %}
+{% load static %}
+
+
+{% block content %}
+   <div class="container-fluid">
+  <style type="text/css">
+    .container{
+      margin-top: 5rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .card{
+      margin: auto;
+    }
+  </style>
+
+  <title>Mini App</title>
+  <div class="container row">
+    {% for image in images %}
+      <div class="card col-md-4" style="width: 18rem;">
+        <img src="{{image.pic.url}}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+        </div>
+      </div>
+    {% endfor %}
+
+{% endblock content %}

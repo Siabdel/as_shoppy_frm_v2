@@ -1,0 +1,165 @@
+{% extends "customer/base_shop.html" %}
+{% load  static l10n %}
+
+{% block header %}
+{% endblock header %}
+
+{% block content %}
+    <div class="container" id="app">
+        <div class="row">
+            <h3 class=""> [[ message ]] </h3>
+            <img class="float-left" src="/media/upload/django-shop-logo.jpeg" width="5%" />
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <form action="/admin/" method="post" @submit.prevent="">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input class="form-control form-control-lg" v-model="filterKey" type="text" placeholder="Saisissez un mot de recherche">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-success" type="submit">Rechercher</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <hr/>
+        <div class="row">
+            <div v-if="sortedCustomers.length==0" scope="row"> 
+                <a class="btn btn-warning" href="{% url 'customer:client-create' %}">
+                    Entregistrer nouveau client
+                </a>
+            </div>
+
+            <table v-if="sortedCustomers.length > 0"  class="table table-striped">
+                <thead>
+                    <tr>
+                        
+                        <th scope="col"> 
+                           select
+                        </th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Client</th>
+                        <th scope="col">Company</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody v-if="sortedCustomers">
+                    <tr v-for="(client, index) in sortedCustomers" :key=index>
+                        <td scope="col">
+                            <input type="checkbox" v-model="selectedClients" :value="client.id">
+                        </td>
+                        <td scope="row"> <a :href="client.get_absolute_url">
+                            [[ client.email ]] </a> </td>
+                        <td>
+                            <a :href='client.get_absolute_url'   target='_blanc'>
+                                [[ client.first_name ]] [[ client.last_name ]] 
+                            </a>  
+                        </td>
+                        <td> [[ client.company ]] </td>
+                        <td class='btn btn-warning' @click="redirect(client, 'update')" url=''> Modifier client </td>
+                        <td v-if="selectedClients.includes(client.id)"  class='btn btn-info' @click="redirect(client, 'checkout')"> Checkout</td>
+                    </tr>
+                </tbody>
+            </table> 
+        </div>
+    </div>
+
+     
+{% endblock content %}
+
+{% block extra_js %}
+    <script>
+        var vm = new Vue({
+            el: "#app",
+            delimiters: ['[[', ']]'],
+            data: { 
+                message : "Client checkout",
+                clients : [],
+                url : "",
+                filterKey : "",
+                sortedKey : "last_name",
+                sortBy : "last_name",
+                currentSort : "last_name",
+                order : -1 ,
+                client_found : false,
+                select : false,
+                selectedClients: [],
+            },
+            //----
+            created(){
+                // `this` est une référence à l'instance de vm
+                console.log('this is message: ' + this.message)
+                this.load_clients()
+            },
+            //---
+            computed: {
+                sortedCustomers() {
+                    return this.clients.filter(client => {
+                        const filterKeyLower = this.filterKey.toLowerCase();
+                        return (
+                            client.first_name.toLowerCase().includes(filterKeyLower) ||
+                            client.last_name.toLowerCase().includes(filterKeyLower) ||
+                            client.email.toLowerCase().includes(filterKeyLower)
+                        );
+                    }).sort((a, b) => {
+                        if (a[this.currentSort] < b[this.currentSort]) return -1 * this.order;
+                        if (a[this.currentSort] > b[this.currentSort]) return 1 * this.order;
+                        return 0;
+                    });
+                }
+            },
+            methods: {
+                redirect(client, action) {
+                    if (action ==='update' && client.get_absolute_url) {
+                        window.location.href = client.get_absolute_url;
+                    }else if( action==='select') {
+                        this.select=!this.select
+                        console.error("ce client est selectionner ", client.email);
+                    }else if( action==='checkout'){
+                        let baseUrl = `{% url 'invoice:create-invoice' 123 %}`
+                         // Construisez la nouvelle URL avec le client_id
+                        //var fullUrl = baseUrl + ' ' + encodeURIComponent(client.id);
+                        var fullUrl = baseUrl.replace('123', client.id);
+                        window.location.href = fullUrl
+                        console.log("fullurl=" ,fullUrl)
+                    }
+                },
+                // Autres méthodes...
+
+                load_clients(){
+                    let url = `/client/api/v1/clients/`
+                    // ajax load
+                    fetch(url)
+                    .then(response => response.json())
+                    .then(json => {
+                        this.clients = json;
+                        
+                        })  
+                    .catch(err => {
+                        //console.log("erreur fetch load_clients", err)
+                        })
+                },
+                //-------
+                chercher_client(event){
+                    let url = `/client/`
+                    // ajax load
+                    fetch(url)
+                    .then(response => response.json())
+                    .then(json => {
+                        this.clients = json;
+                        //---
+                        console.log(" data = " + this.clients.length )
+                        })  
+                    .catch(err => {
+                        console.log("erreur fetch", err.msg);
+                        }
+                        )
+                },
+            }
+        });
+        // mount
+        vm.$mount('#app')
+    </script>
+{% endblock extra_js%}
+

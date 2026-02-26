@@ -1,0 +1,40 @@
+
+{% extends 'product/base_shop.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2>Récapitulatif de la commande</h2>
+    {% if cart_items %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Produit</th>
+                    <th>Quantité</th>
+                    <th>Prix unitaire</th>
+                    <th>Prix total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.product.price }} €</td>
+                        <td>{{ item.total_price }} €</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="3" class="text-right"><strong>Total :</strong></td>
+                    <td><strong>{{ total }} €</strong></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="text-right">
+            <a href="{% url 'shop:client_checkout'  %}" class="btn btn-success">Valider la commande</a>
+        </div>
+    {% else %}
+        <p>Votre panier est vide.</p>
+    {% endif %}
+</div>
+{% endblock %}

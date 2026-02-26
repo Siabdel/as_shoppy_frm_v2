@@ -1,0 +1,12 @@
+{% extends 'shop/base.html' %}
+{% load i18n static %}
+
+{% block content %}
+   <div class="container">
+      <div class="row" style="margin-top: 6%">
+        <div class="col-md-6 text-right">
+            <img class="rounded-lg rounded-3 img-fluid" src="{{ image.image.url }}" alt="{{ product.name }}" style="height: 370px; width: auto">
+        </div>
+      </div><!-- /.row -->
+    </div><!-- /.container -->
+{% endblock %}

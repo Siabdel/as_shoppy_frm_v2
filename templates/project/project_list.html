@@ -1,0 +1,81 @@
+{% extends "./base_project.html" %}
+{% load i18n static %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container bg-light">
+    {% if projets|length > 1 %}
+    <div class="row pt-lg-10">
+            {% for project in projects %}
+            <div class="col-lg-6 col-md-6 mb-4">
+                <div class="card h-100">
+                    {% with url_name='project'|add:":project_detail" %}
+                    <a href="{% url url_name  project.pk %}">
+                        {% if project.default_image %}
+                            <img class="card-img-top rounded-lg img-fluid mx-auto d-block" src="{{ project.default_image.url }}" alt="{{ project.default_image.url }}" style="height: 200px; width: 600px;">
+                        {% endif %}
+                    </a>
+                    {% endwith %} 
+                    <div class="card-body">
+                        <h4 class="card-title">
+                    {% with url_name='project'|add:":project_detail" %}
+                            <a href="{% url url_name project.pk %}">
+                                {{ project.title | slice:"0:30" }}
+                            </a>
+                    {% endwith %}
+                        </h4>
+                        <h5><p class="text-left">Prix à partir de : {{ project.price }} Euro</p></h5>
+                        <p class="card-text">Description : {{ project.description | slice:"0:250" }}</p>
+                        {% for spec in project.options %}  
+                            <p class="card-text">{{ spec.name }} : {{ spec.value }}</p>
+                        {% endfor %}
+                    </div>
+                    <div class="card-footer">
+                        <div class="col-xs-12 col-md-6">
+                            <a href="{% url 'project:project_detail' project.id %}" class="btn btn-warning btn-lg">Voir les détails</a> 
+                        </div>
+                        <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="content">
+        {% with project=projects.0 %}
+        <h2> {{ project.title }} </h2>
+        <a href="{% url 'project:project_detail' project.pk %}">
+            {% if project.default_image %}
+                <img class="img-left rounded-lg img-fluid" src="{{ project.default_image.url }}" alt="{{ project.default_image.url }}" style="height: 400px; width: 800;">
+            {% endif %}
+        </a>
+        <div class="card-body">
+            <h4 class="card-title">
+                {% with url_name='project'|add:":project_detail" %}
+                        <a href="{% url url_name project.pk %}">
+                            {{ project.title | slice:"0:30" }}
+                        </a>
+                {% endwith %}
+            </h4>
+            <h5><p class="text-left">Prix à partir de : {{ project.price }} Euro</p></h5>
+            <p class="card-text">Description : {{ project.description | slice:"0:250" }}</p>
+            {% for spec in project.options %}  
+                <p class="card-text">{{ spec.name }} : {{ spec.value }}</p>
+            {% endfor %}
+        </div>
+        <div class="card-footer">
+            <div class="col-xs-12 col-md-6">
+                <a href="{% url 'project:project_detail' project.pk %}" class="btn btn-warning btn-lg">Voir les détails</a> 
+            </div>
+            <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
+        </div>
+        {% endwith %} 
+    {% endif %}
+    </div>
+</div>
+{% endblock %}
+    
