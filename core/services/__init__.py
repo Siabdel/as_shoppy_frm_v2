@@ -1,23 +1,14 @@
-"""
-Core Services Module
+# Core Services Module
+# This module contains service implementations using the Strategy pattern
 
-Provides a service layer for business logic encapsulation.
-Services handle complex operations, workflow management,
-and cross-model interactions.
-"""
-
-from .base import BaseService, ServiceError, ValidationError
-from .order_service import OrderService
-from .quote_service import QuoteService
-from .invoice_service import InvoiceService
-from .project_service import ProjectService
+from core.services.pricing import PricingService
+from core.services.stock import StockService
+from core.services.payment import PaymentService
+from core.services.shipping import ShippingService
 
 __all__ = [
-    'BaseService',
-    'ServiceError',
-    'ValidationError',
-    'OrderService',
-    'QuoteService',
-    'InvoiceService',
-    'ProjectService',
+    'PricingService',
+    'StockService',
+    'PaymentService',
+    'ShippingService',
 ]

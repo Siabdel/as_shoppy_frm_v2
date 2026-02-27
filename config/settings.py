@@ -42,51 +42,66 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Application definition
 
 INSTALLED_APPS = [
-    'core', # ne
-    'core.taxonomy', # new
-    'core.profile',  # new
-    'core.streams',  # Streams & Milestones
-    'project.apps.ProjectConfig', # new
-    #'core.cart', # Cart
-    'core.mfilesupload', # Multi files upload
+    # Core Framework (Stable - rarely changes)
+    'core',
+    'core.taxonomy',
+    'core.profile',
+    'core.streams',
+    'core.products',      # Base product models & interfaces
+    'core.cart',          # Cart logic (business-agnostic)
+    'core.quotes',        # Quotes (devis)
+    'core.orders',        # Orders
+    'core.invoices',      # Invoices
+    'core.payments',      # Payment tracking
+    'core.stock',         # Stock movements & reservations
+    'core.services',      # Service strategies (pricing, stock, payment, shipping)
+    
+    # Project specific
+    'project.apps.ProjectConfig',
+    'core.mfilesupload',  # Multi files upload
+    
+    # Django contrib
     'polymorphic',
     'mptt',
-    # django contrib
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     # 3rd-party apps
-    'rest_framework', # new
+    'rest_framework',
     'rest_framework.authtoken',
     "dj_rest_auth",
-    'drf_spectacular',  # Swagger/OpenAPI documentation
-    'drf_spectacular_sidecar',  # Optional: self-contained UI assets
-    # debug tools
-    'debug_toolbar', # new
+    'drf_spectacular',    # Swagger/OpenAPI documentation
+    'drf_spectacular_sidecar',
+    'debug_toolbar',
     'corsheaders',
+    
     # User Authentication
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    
     # Third party
     'crispy_forms',
-    #'crispy_bootstrap5',  # Si vous utilisez Bootstrap 5
     "crispy_bootstrap4",
     "django_extensions",
-    'mapwidgets', ## new google map
-    #'markdownx', # <-- needed for adding markdown to forms
-    "invoice", # Facture
-    "devis.apps.DevisConfig", # quote devis
-    'customer', # customer
-    'core.orders', # Orders
-    # local app
-    'immoshop.apps.ImmoshopyConfig', # Immobilier
-    #'autocar.apps.AutoCarConfig', # Autocar
-    'product.apps.ProductConfig', # Product
-    'shop.apps.ShopConfig', # Shop
+    'mapwidgets',
+    
+    # Business Applications (Plugins - can be added/removed)
+    'business.immo',      # Real Estate
+    'business.retail',    # Retail E-commerce
+    'business.auto',      # Automotive
+    
+    # Legacy apps (for migration)
+    "invoice",
+    "devis.apps.DevisConfig",
+    'customer',
+    'immoshop.apps.ImmoshopyConfig',
+    'product.apps.ProductConfig',
+    'shop.apps.ShopConfig',
     
 ]
 

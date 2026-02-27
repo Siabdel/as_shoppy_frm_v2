@@ -1,427 +1,368 @@
+# -*- coding: utf-8 -*-
 """
-Unified Order Models Module
+Core Orders Module - Base Models
 
-Consolidates order-related models with workflow support,
-enums integration, and service layer compatibility.
+This module contains the base order models.
+Orders are the third step in the business workflow:
+Catalog -> Cart -> Quote -> Order -> Invoice
+
+Stock Management:
+- Reservation: At order time (reserve stock for the order)
+- Decrement: On delivery (permanent reduction in inventory)
+- History: All stock movements are tracked
 """
 
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-from django.conf import settings
+from django.utils.translation import gettext as _
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
-from core.enums import OrderStatus, PaymentStatus, ChoiceEnumField
-from core.state_machine import WorkflowMixin
-from product import models as pro_models
+from core import deferred
 
 
-class Order(WorkflowMixin, models.Model):
+class OrderStatus:
     """
-    Unified Order model with workflow support.
+    Order status enumeration.
     
-    Combines functionality from the simple Order model and
-    integrates with the state machine for lifecycle management.
+    Workflow: CREATED -> AWAITING_PAYMENT -> PAID -> SHIPPED -> COMPLETED
+               or: CREATED -> AWAITING_PAYMENT -> CANCELLED
+    """
+    CREATED = 'created'
+    AWAITING_PAYMENT = 'awaiting_payment'
+    PAID = 'paid'
+    SHIPPED = 'shipped'
+    COMPLETED = 'completed'
+    CANCELLED = 'cancelled'
+    
+    CHOICES = [
+        (CREATED, _('Created')),
+        (AWAITING_PAYMENT, _('Awaiting Payment')),
+        (PAID, _('Paid')),
+        (SHIPPED, _('Shipped')),
+        (COMPLETED, _('Completed')),
+        (CANCELLED, _('Cancelled')),
+    ]
+    
+    @classmethod
+    def get_default(cls):
+        return cls.CREATED
+
+
+class BaseOrderModel(models.Model):
+    """
+    Abstract base model for orders.
+    
+    An order is created from an accepted quote and represents
+    a confirmed transaction.
     """
     
-    # Customer Information
-    first_name = models.CharField(max_length=60, verbose_name=_("First Name"))
-    last_name = models.CharField(max_length=60, verbose_name=_("Last Name"))
-    email = models.EmailField(verbose_name=_("Email"))
-    phone = models.CharField(
-        max_length=20, blank=True, verbose_name=_("Phone")
+    # Order identification
+    numero = models.CharField(
+        max_length=255, 
+        unique=True, 
+        editable=False,
+        verbose_name=_('Order number')
     )
     
-    # Shipping Address
-    address = models.CharField(max_length=150, verbose_name=_("Address"))
-    address_line2 = models.CharField(
-        max_length=150, blank=True, verbose_name=_("Address Line 2")
-    )
-    postal_code = models.CharField(
-        max_length=30, verbose_name=_("Postal Code")
-    )
-    city = models.CharField(max_length=100, verbose_name=_("City"))
-    country = models.CharField(
-        max_length=100, default="France", verbose_name=_("Country")
+    # Customer reference
+    customer = deferred.ForeignKey(
+        'customer.Customer',
+        on_delete=models.CASCADE,
+        related_name='orders',
+        verbose_name=_('Customer')
     )
     
-    # Billing Address (optional, defaults to shipping)
-    billing_address = models.CharField(
-        max_length=150, blank=True, verbose_name=_("Billing Address")
-    )
-    billing_postal_code = models.CharField(
-        max_length=30, blank=True, verbose_name=_("Billing Postal Code")
-    )
-    billing_city = models.CharField(
-        max_length=100, blank=True, verbose_name=_("Billing City")
-    )
-    
-    # Order Status with Workflow
-    status = ChoiceEnumField(
-        enum_type=OrderStatus,
-        default=OrderStatus.PENDING,
-        verbose_name=_("Status")
+    # Quote source (optional - orders can be created directly)
+    quote_source = deferred.ForeignKey(
+        'quotes.BaseQuote',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='converted_orders',
+        verbose_name=_('Quote source')
     )
     
-    # Payment Information
-    payment_status = ChoiceEnumField(
-        enum_type=PaymentStatus,
-        default=PaymentStatus.PENDING,
-        verbose_name=_("Payment Status")
+    # Creator
+    created_by = models.ForeignKey(
+        'auth.User',
+        on_delete=models.CASCADE,
+        verbose_name=_('Created by')
     )
-    paid = models.BooleanField(default=False, verbose_name=_("Paid"))
+    
+    # Status
+    status = models.CharField(
+        max_length=20,
+        choices=OrderStatus.CHOICES,
+        default=OrderStatus.get_default,
+        verbose_name=_('Status')
+    )
+    
+    # Dates
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     paid_at = models.DateTimeField(
-        null=True, blank=True, verbose_name=_("Paid At")
-    )
-    
-    # Shipping Information
-    shipping_method = models.CharField(
-        max_length=100, blank=True, verbose_name=_("Shipping Method")
-    )
-    shipping_cost = models.DecimalField(
-        max_digits=10, decimal_places=2,
-        default=0, verbose_name=_("Shipping Cost")
-    )
-    tracking_number = models.CharField(
-        max_length=100, blank=True, verbose_name=_("Tracking Number")
-    )
-    shipping_carrier = models.CharField(
-        max_length=100, blank=True, verbose_name=_("Shipping Carrier")
+        null=True,
+        blank=True,
+        verbose_name=_('Paid at')
     )
     shipped_at = models.DateTimeField(
-        null=True, blank=True, verbose_name=_("Shipped At")
+        null=True,
+        blank=True,
+        verbose_name=_('Shipped at')
     )
-    delivered_at = models.DateTimeField(
-        null=True, blank=True, verbose_name=_("Delivered At")
-    )
-    
-    # Financial Summary
-    subtotal = models.DecimalField(
-        max_digits=10, decimal_places=2,
-        default=0, verbose_name=_("Subtotal")
-    )
-    tax_amount = models.DecimalField(
-        max_digits=10, decimal_places=2,
-        default=0, verbose_name=_("Tax Amount")
-    )
-    discount_amount = models.DecimalField(
-        max_digits=10, decimal_places=2,
-        default=0, verbose_name=_("Discount Amount")
-    )
-    total = models.DecimalField(
-        max_digits=10, decimal_places=2,
-        default=0, verbose_name=_("Total")
-    )
-    
-    # Timestamps
-    created = models.DateTimeField(
-        auto_now_add=True, verbose_name=_("Created")
-    )
-    updated = models.DateTimeField(
-        auto_now=True, verbose_name=_("Updated")
-    )
-    
-    # User Relations
-    customer = models.ForeignKey(
-        'customer.Customer',
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='orders',
-        verbose_name=_("Customer")
-    )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='orders',
-        verbose_name=_("User")
-    )
-    
-    # Cancellation
-    cancellation_reason = models.TextField(
-        blank=True, verbose_name=_("Cancellation Reason")
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_('Completed at')
     )
     cancelled_at = models.DateTimeField(
-        null=True, blank=True, verbose_name=_("Cancelled At")
-    )
-    
-    # Notes
-    customer_notes = models.TextField(
-        blank=True, verbose_name=_("Customer Notes")
-    )
-    internal_notes = models.TextField(
-        blank=True, verbose_name=_("Internal Notes")
-    )
-    
-    # Workflow Configuration
-    _state_field = 'status'
-    
-    class Meta:
-        ordering = ('-created',)
-        verbose_name = _("Order")
-        verbose_name_plural = _("Orders")
-        indexes = [
-            models.Index(fields=['status', 'created']),
-            models.Index(fields=['customer', 'status']),
-            models.Index(fields=['paid', 'status']),
-        ]
-    
-    def __str__(self):
-        return f"Order #{self.id} - {self.get_status_display()}"
-    
-    def save(self, *args, **kwargs):
-        """Override save to calculate totals."""
-        self.calculate_totals()
-        super().save(*args, **kwargs)
-    
-    def calculate_totals(self):
-        """Calculate order totals from items."""
-        self.subtotal = sum(
-            item.get_subtotal() for item in self.items.all()
-        )
-        self.total = (
-            self.subtotal +
-            self.shipping_cost +
-            self.tax_amount -
-            self.discount_amount
-        )
-    
-    def get_total_cost(self):
-        """Legacy method for backward compatibility."""
-        return self.total
-    
-    def get_subtotal(self):
-        """Get order subtotal."""
-        return self.subtotal
-    
-    def get_item_count(self):
-        """Get total number of items."""
-        return sum(item.quantity for item in self.items.all())
-    
-    # Workflow Methods
-    def can_confirm(self):
-        """Check if order can be confirmed."""
-        return self.status == OrderStatus.PENDING.value
-    
-    def can_cancel(self):
-        """Check if order can be cancelled."""
-        return self.status in [
-            OrderStatus.PENDING.value,
-            OrderStatus.CONFIRMED.value,
-            OrderStatus.ON_HOLD.value
-        ]
-    
-    def can_ship(self):
-        """Check if order can be shipped."""
-        return self.status == OrderStatus.PROCESSING.value
-    
-    def can_deliver(self):
-        """Check if order can be marked as delivered."""
-        return self.status == OrderStatus.SHIPPED.value
-
-
-class OrderItem(models.Model):
-    """
-    Unified Order Item model.
-    
-    Represents a product line in an order with full pricing details.
-    """
-    
-    order = models.ForeignKey(
-        Order,
-        related_name='items',
-        on_delete=models.CASCADE,
-        verbose_name=_("Order")
-    )
-    product = models.ForeignKey(
-        pro_models.Product,
-        related_name='order_items',
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        verbose_name=_("Product")
-    )
-    
-    # Product Details (snapshot at time of order)
-    product_name = models.CharField(
-        max_length=255, verbose_name=_("Product Name")
-    )
-    product_sku = models.CharField(
-        max_length=100, blank=True, verbose_name=_("SKU")
-    )
-    
-    # Pricing
-    price = models.DecimalField(
-        max_digits=10, decimal_places=2,
-        verbose_name=_("Unit Price")
-    )
-    original_price = models.DecimalField(
-        max_digits=10, decimal_places=2,
-        default=0, verbose_name=_("Original Price")
-    )
-    quantity = models.PositiveIntegerField(
-        default=1, verbose_name=_("Quantity")
-    )
-    
-    # Discounts
-    discount_amount = models.DecimalField(
-        max_digits=10, decimal_places=2,
-        default=0, verbose_name=_("Discount Amount")
-    )
-    discount_percentage = models.DecimalField(
-        max_digits=5, decimal_places=2,
-        default=0, verbose_name=_("Discount %")
-    )
-    
-    # Tax
-    tax_rate = models.DecimalField(
-        max_digits=5, decimal_places=2,
-        default=0, verbose_name=_("Tax Rate %")
-    )
-    tax_amount = models.DecimalField(
-        max_digits=10, decimal_places=2,
-        default=0, verbose_name=_("Tax Amount")
+        null=True,
+        blank=True,
+        verbose_name=_('Cancelled at')
     )
     
     # Totals
-    line_total = models.DecimalField(
-        max_digits=10, decimal_places=2,
-        default=0, verbose_name=_("Line Total")
+    total_amount = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2,
+        default=0,
+        verbose_name=_('Total amount')
+    )
+    tax_amount = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2,
+        default=0,
+        verbose_name=_('Tax amount')
+    )
+    shipping_cost = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2,
+        default=0,
+        verbose_name=_('Shipping cost')
+    )
+    
+    # Completion flag
+    completed = models.BooleanField(
+        default=False,
+        verbose_name=_('Completed')
+    )
+    
+    # Notes
+    notes = models.TextField(
+        blank=True,
+        verbose_name=_('Notes')
     )
     
     class Meta:
-        verbose_name = _("Order Item")
-        verbose_name_plural = _("Order Items")
+        abstract = True
+        ordering = ('-created_at',)
+        verbose_name = _('Order')
+        verbose_name_plural = _('Orders')
     
     def __str__(self):
-        return f"{self.product_name} x{self.quantity}"
+        return f"Order {self.numero}"
+    
+    def generate_number(self, order_pk):
+        """Generate a unique order number."""
+        today = timezone.now()
+        year = today.strftime("%Y")
+        month = today.strftime("%m")
+        day = today.strftime("%d")
+        return f"ORD-{year}{month}{day}-{order_pk:06d}"
     
     def save(self, *args, **kwargs):
-        """Calculate line totals before saving."""
-        self.calculate_line_total()
+        if not self.numero:
+            super().save(*args, **kwargs)
+            self.numero = self.generate_number(self.pk)
+            super().save(update_fields=['numero'])
         super().save(*args, **kwargs)
     
-    def calculate_line_total(self):
-        """Calculate the line total."""
-        subtotal = self.price * self.quantity
-        discount = self.discount_amount * self.quantity
-        self.line_total = subtotal - discount + self.tax_amount
+    def is_paid(self):
+        """Check if order has been paid."""
+        return self.status in [OrderStatus.PAID, OrderStatus.SHIPPED, OrderStatus.COMPLETED]
     
-    def get_cost(self):
-        """Legacy method for backward compatibility."""
-        return self.line_total
+    def is_cancelled(self):
+        """Check if order has been cancelled."""
+        return self.status == OrderStatus.CANCELLED
     
-    def get_subtotal(self):
-        """Get item subtotal (price * quantity)."""
-        return self.price * self.quantity
+    def is_completed(self):
+        """Check if order has been completed."""
+        return self.status == OrderStatus.COMPLETED
     
-    def get_discount(self):
-        """Get total discount for this line."""
-        return self.discount_amount * self.quantity
+    # Status transition methods
+    def mark_as_paid(self):
+        """Mark order as paid and reserve stock."""
+        if self.status == OrderStatus.AWAITING_PAYMENT:
+            self.status = OrderStatus.PAID
+            self.paid_at = timezone.now()
+            self.save()
+            self.reserve_stock()
+    
+    def mark_as_shipped(self):
+        """Mark order as shipped and decrement stock."""
+        if self.status == OrderStatus.PAID:
+            self.status = OrderStatus.SHIPPED
+            self.shipped_at = timezone.now()
+            self.save()
+            self.decrement_stock()
+    
+    def mark_as_completed(self):
+        """Mark order as completed."""
+        if self.status == OrderStatus.SHIPPED:
+            self.status = OrderStatus.COMPLETED
+            self.completed_at = timezone.now()
+            self.completed = True
+            self.save()
+    
+    def mark_as_cancelled(self):
+        """Mark order as cancelled and release stock."""
+        if self.status not in [OrderStatus.COMPLETED, OrderStatus.CANCELLED]:
+            self.status = OrderStatus.CANCELLED
+            self.cancelled_at = timezone.now()
+            self.save()
+            self.release_stock()
+    
+    def reserve_stock(self):
+        """
+        Reserve stock for all items in the order.
+        
+        Called when order is paid.
+        """
+        for item in self.get_items():
+            if item.product.managed_availability():
+                item.product.reserve_stock(item.quantity, self.numero)
+    
+    def release_stock(self):
+        """
+        Release reserved stock.
+        
+        Called when order is cancelled.
+        """
+        for item in self.get_items():
+            if item.product.managed_availability():
+                item.product.release_reservation(item.quantity, self.numero)
+    
+    def decrement_stock(self):
+        """
+        Permanently decrement stock for all items.
+        
+        Called when order is shipped/delivered.
+        """
+        for item in self.get_items():
+            if item.product.managed_availability():
+                item.product.decrement_stock(item.quantity, 'sale')
+    
+    def to_invoice(self, request):
+        """
+        Convert order to invoice.
+        
+        This is the Order -> Invoice step in the workflow.
+        
+        Args:
+            request: HTTP request
+            
+        Returns:
+            Invoice: The created invoice
+        """
+        from core.invoices.models import BaseInvoiceModel
+        
+        invoice = BaseInvoiceModel.objects.create(
+            customer=self.customer,
+            created_by=request.user,
+            order_source=self,
+            total_amount=self.total_amount,
+            status='draft',  # InvoiceStatus.DRAFT
+        )
+        
+        # Copy items from order to invoice
+        for order_item in self.get_items():
+            invoice.add_item(
+                product=order_item.product,
+                quantity=order_item.quantity,
+                unit_price=order_item.unit_price,
+            )
+        
+        return invoice
+    
+    def get_items(self):
+        """Get all items in the order. Override in subclass."""
+        return []
 
 
-class OrderPayment(models.Model):
+class BaseOrderItemModel(models.Model):
     """
-    Order Payment model.
+    Abstract base model for order items.
     
-    Tracks payments made against an order.
+    Uses ContentTypes to support polymorphic product relations.
     """
     
-    order = models.ForeignKey(
-        Order,
-        related_name='payments',
+    # Polymorphic product reference
+    content_type = models.ForeignKey(
+        ContentType,
         on_delete=models.CASCADE,
-        verbose_name=_("Order")
+        limit_choices_to={'model__startswith': 'product'},
     )
-    amount = models.DecimalField(
-        max_digits=10, decimal_places=2,
-        verbose_name=_("Amount")
+    object_id = models.PositiveIntegerField()
+    product = GenericForeignKey('content_type', 'object_id')
+    
+    # Order reference
+    order = models.ForeignKey(
+        'BaseOrderModel',
+        related_name='order_items',
+        on_delete=models.CASCADE
     )
-    payment_method = models.CharField(
-        max_length=50,
-        verbose_name=_("Payment Method")
+    
+    # Item fields
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    rate = models.DecimalField(
+        max_digits=6, 
+        decimal_places=2, 
+        null=True, 
+        blank=True,
+        verbose_name=_('Discount rate (%)')
     )
-    transaction_id = models.CharField(
-        max_length=255, blank=True,
-        verbose_name=_("Transaction ID")
+    tax = models.DecimalField(
+        max_digits=6, 
+        decimal_places=2, 
+        default=0,
+        verbose_name=_('Tax rate (%)')
     )
-    status = models.CharField(
-        max_length=20,
-        choices=[
-            ('pending', _('Pending')),
-            ('completed', _('Completed')),
-            ('failed', _('Failed')),
-            ('refunded', _('Refunded')),
-        ],
-        default='pending',
-        verbose_name=_("Status")
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name=_("Created At")
-    )
-    completed_at = models.DateTimeField(
-        null=True, blank=True, verbose_name=_("Completed At")
-    )
+    
+    # Stock tracking
+    is_reserved = models.BooleanField(default=False)
+    is_shipped = models.BooleanField(default=False)
     
     class Meta:
-        verbose_name = _("Order Payment")
-        verbose_name_plural = _("Order Payments")
-        ordering = ['-created_at']
+        abstract = True
+        verbose_name = _('Order Item')
+        verbose_name_plural = _('Order Items')
+    
+    @property
+    def subtotal(self):
+        """Calculate subtotal without tax."""
+        return self.quantity * self.unit_price
+    
+    @property
+    def subtotal_with_tax(self):
+        """Calculate subtotal with tax."""
+        tax_amount = self.subtotal * (self.tax / 100)
+        return self.subtotal + tax_amount
     
     def __str__(self):
-        return f"Payment {self.id} for Order {self.order_id}"
-    
-    def mark_completed(self):
-        """Mark payment as completed."""
-        self.status = 'completed'
-        self.completed_at = timezone.now()
-        self.save()
-        
-        # Update order payment status
-        self.order.paid = True
-        self.order.paid_at = timezone.now()
-        self.order.payment_status = PaymentStatus.CAPTURED
-        self.order.save()
-    
-    def mark_failed(self, reason=""):
-        """Mark payment as failed."""
-        self.status = 'failed'
-        self.save()
-        
-        self.order.payment_status = PaymentStatus.FAILED
-        self.order.save()
+        return f"{self.product} - {self.subtotal}"
 
 
-class OrderStatusHistory(models.Model):
-    """
-    Order Status History model.
-    
-    Tracks all status changes for audit purposes.
-    """
-    
-    order = models.ForeignKey(
-        Order,
-        related_name='status_history',
-        on_delete=models.CASCADE,
-        verbose_name=_("Order")
-    )
-    from_status = models.CharField(
-        max_length=50, verbose_name=_("From Status")
-    )
-    to_status = models.CharField(max_length=50, verbose_name=_("To Status"))
-    changed_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        verbose_name=_("Changed By")
-    )
-    notes = models.TextField(blank=True, verbose_name=_("Notes"))
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name=_("Created At")
-    )
-    
-    class Meta:
-        verbose_name = _("Order Status History")
-        verbose_name_plural = _("Order Status Histories")
-        ordering = ['-created_at']
-    
-    def __str__(self):
-        return f"{self.from_status} -> {self.to_status}"
+# Aliases for backward compatibility
+BaseOrder = BaseOrderModel
+BaseOrderItem = BaseOrderItemModel
+
+
+__all__ = [
+    'BaseOrder',
+    'BaseOrderItem',
+    'OrderStatus',
+    'BaseOrderModel',
+    'BaseOrderItemModel',
+]
