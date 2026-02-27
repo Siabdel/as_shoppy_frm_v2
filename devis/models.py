@@ -5,6 +5,7 @@ from django.utils import timezone
 from enum import Enum
 from customer.models import Customer
 from product.models import Product
+from django.apps import apps
 
 class StatutDevis(Enum):
     BROUILLON = ('brouillon', _('Brouillon'))
@@ -78,6 +79,7 @@ class Quote(models.Model):
     def convertir_en_facture(self):
         if self.statut == StatutDevis.ACCEPTE.code:
             # Créer une nouvelle facture basée sur ce devis
+            Invoice = apps.get_model('invoice', 'Invoice')
             facture = Invoice.objects.create(
                 client=self.client,
                 total_amount=self.total_amount,

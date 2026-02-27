@@ -4,12 +4,13 @@ Stream Signals Module
 Signals for automatically creating stream events when certain actions occur.
 """
 
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 
 from .models import Stream, StreamEvent
 from .enums import EventType, StreamType
+from core.orders.models import Order
 
 
 @receiver(post_save, sender='project.Project')
@@ -45,7 +46,7 @@ def project_stream_handler(sender, instance, created, **kwargs):
     )
 
 
-@receiver(post_save, sender='core.orders.Order')
+@receiver(post_save, sender=Order)
 def order_stream_handler(sender, instance, created, **kwargs):
     """Create stream events for order changes."""
     content_type = ContentType.objects.get_for_model(instance)

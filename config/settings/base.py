@@ -79,10 +79,10 @@ INSTALLED_APPS = [
     'mapwidgets', ## new google map
     #'markdownx', # <-- needed for adding markdown to forms
     #"core.orders",
-    #"invoice", # Facture
-    #"devis.apps.DevisConfig", # quote devis
-    #'customer', # customer
-    #'core.orders', # Orders
+    "invoice", # Facture
+    "devis.apps.DevisConfig", # quote devis
+    'customer', # customer
+    'core.orders', # Orders
     # local app
     #'immoshopy.apps.ImmoshopyConfig', # Immobilier
     #'autocar.apps.AutoCarConfig', # Autocar
