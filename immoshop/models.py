@@ -12,7 +12,8 @@ class ImmoProduct(pro_models.Product):
 
     def get_absolute_url(self):
         return reverse("immoshop:product_immo_detail", args=[str(self.id)])
-
+    class Meta : 
+        app_label = 'immoshop'
 class ImmoProductImage(pro_models.ProductImage):
     pass
     

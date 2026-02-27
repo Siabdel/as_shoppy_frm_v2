@@ -45,7 +45,7 @@ def project_stream_handler(sender, instance, created, **kwargs):
     )
 
 
-@receiver(post_save, sender='orders.Order')
+@receiver(post_save, sender='core.orders.Order')
 def order_stream_handler(sender, instance, created, **kwargs):
     """Create stream events for order changes."""
     content_type = ContentType.objects.get_for_model(instance)

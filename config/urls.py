@@ -38,9 +38,9 @@ urlpatterns = [
     # apps local
     path('proj/', include('project.urls'), name='proj_home'),
     path('prod/', include('product.urls'), name='prod_home'),
-    path('shop/', include('shop.urls'), name='sh_home'),
+    #path('shop/', include('shop.urls'), name='sh_home'),
     path('cart/', include('core.cart.urls')),
-    path("client/", include("customer.urls")),
+    path("customer/", include("customer.urls")),
     # invoices
     path("invoice/", include('invoice.urls')),
     path('devis/', include('devis.urls')),  # Devis
@@ -50,7 +50,7 @@ urlpatterns = [
     # Streams & Milestones API (legacy path, kept for backward compatibility)
     path("api/streams/", include("core.streams.urls")),
     ## Projet Immobilier
-    path('', include('immoshopy.urls', 'immoshopy')),
+    #path('', include('immoshop.urls', 'immoshop')),
     ## Projet Concession Auto
     #path('carshop/', include(('autocar.urls', 'carshop'), namespace='carshop')),
 ]

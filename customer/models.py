@@ -1,24 +1,20 @@
 import string
 from importlib import import_module
-import warnings
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.signals import user_logged_in, user_logged_out
-from django.db.models.signals import post_save
 from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
-from django.db import models, DEFAULT_DB_ALIAS
+from django.db import models
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import SimpleLazyObject
 from django.utils.translation import gettext_lazy as _
 
 from core import deferred
-from core.fields import JSONField
 from core.signals import customer_recognized
 from core.fields import ChoiceEnum, ChoiceEnumField
-from django.contrib.auth import get_user_model
 from django.urls import reverse
 from phonenumber_field.modelfields import PhoneNumberField
 from polymorphic.models import PolymorphicModel, PolymorphicManager
@@ -247,9 +243,10 @@ class Customer(PolymorphicModel):
     
     class Meta:
         ordering = ('first_name', 'last_name', )
-        verbose_name: "Customer"
-        verbose_name_plural: "Customers"  # client 
+        verbose_name = "Customer"
+        verbose_name_plural = "Customers"  # client
         unique_together = [('email', ), ('email', 'first_name', 'last_name' ),]
+        app_label = 'customer'
 
     def __str__(self):
         return f"{self.code}-{self.first_name} {self.last_name}"
@@ -353,3 +350,12 @@ class Appointment(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     date_time = models.DateTimeField()
     purpose = models.CharField(max_length=200)
+    
+    class Meta:
+        app_label = 'customer'
+        verbose_name = "Appointment"
+        verbose_name_plural = "Appointments"
+        ordering = ['date_time']
+    
+    def __str__(self):
+        return f"Appointment {self.id} - {self.customer} - {self.date_time}"

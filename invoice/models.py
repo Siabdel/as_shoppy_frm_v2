@@ -10,7 +10,6 @@ from django.utils.translation import gettext as _
 from product import models as pro_models
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from devis.models import Quote
 
 def get_default_expiration_date():
     return timezone.now() + timedelta(days=30)
@@ -44,7 +43,7 @@ class StatutFacture(Enum):
 class Invoice(models.Model):
     client = models.ForeignKey(Customer, on_delete=models.CASCADE)
     numero = models.CharField(max_length=50, unique=True, editable=False)
-    devis_source = models.ForeignKey(Quote, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Devis source"))
+    devis_source = models.ForeignKey('devis.Quote', on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Devis source"))
 
     # Champ pour le statut utilisant l'énumération
     
@@ -71,8 +70,9 @@ class Invoice(models.Model):
     completed = models.BooleanField(default=False) # invoice valide qui n'est pas vide de items
 
     class Meta:
-        verbose_name: "Invoice"
-        verbose_name_plural: "Invoices"  # noqa F821
+        app_label = 'invoice'
+        verbose_name = "Invoice"
+        verbose_name_plural = "Invoices"
 
     def get_absolute_url(self):
         return reverse("invoice-detail", kwargs={"pk": self.pk})
@@ -140,6 +140,7 @@ class InvoiceItem(models.Model):
     rate = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     tax = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True, blank=True)
     class Meta:
+        app_label = 'invoice'
         verbose_name: "Invoice_Item"
         verbose_name_plural: "Invoice_Items"
 

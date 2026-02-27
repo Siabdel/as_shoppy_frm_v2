@@ -78,16 +78,16 @@ INSTALLED_APPS = [
     "django_extensions",
     'mapwidgets', ## new google map
     #'markdownx', # <-- needed for adding markdown to forms
-    "core.orders",
-    "invoice", # Facture
-    "devis.apps.DevisConfig", # quote devis
-    'customer', # customer
+    #"core.orders",
+    #"invoice", # Facture
+    #"devis.apps.DevisConfig", # quote devis
+    #'customer', # customer
     #'core.orders', # Orders
     # local app
-    'immoshopy.apps.ImmoshopyConfig', # Immobilier
+    #'immoshopy.apps.ImmoshopyConfig', # Immobilier
     #'autocar.apps.AutoCarConfig', # Autocar
     'product.apps.ProductConfig', # Product
-    'shop.apps.ShopConfig', # Shop
+    #'shop.apps.ShopConfig', # Shop
     
 ]
 
@@ -124,8 +124,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'core.context_processors.shop_settings', ## new
-                'immoshopy.context_processors.milestones', ## new
+                #'core.context_processors.shop_settings', ## new
+                #'immoshopy.context_processors.milestones', ## new
                 #'core.context_processors.shop', ## new
                 #'core.context_processors.customer', ## new
             ],
@@ -158,8 +158,8 @@ DATABASES = {
     }
 }
 ##
-#CART_PRODUCT_MODEL = 'product.Product'
-CART_PRODUCT_MODEL = 'immoshopy.ImmoProduct'
+CART_PRODUCT_MODEL = 'product.Product'
+#CART_PRODUCT_MODEL = 'immoshopy.ImmoProduct'
 #CART_PRODUCT_MODEL = 'autocar.VehiculeProduct'
 
 

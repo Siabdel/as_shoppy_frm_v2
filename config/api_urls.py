@@ -20,7 +20,6 @@ from product.api_views import (
     ProductTypeViewSet, ProductSpecificationViewSet
 )
 from customer.api_views import CustomerViewSet
-from immoshopy.api_views import ImmoProductViewSet
 from project.api_views import ProjectViewSet, TaskViewSet, TicketViewSet
 from devis.api_views import QuoteViewSet, QuoteItemViewSet
 
@@ -44,7 +43,6 @@ router.register(r'product-specifications', ProductSpecificationViewSet, basename
 router.register(r'customers', CustomerViewSet, basename='customer')
 
 # Immobilier
-router.register(r'immoproducts', ImmoProductViewSet, basename='immoproduct')
 
 # Projects
 router.register(r'projects', ProjectViewSet, basename='project')

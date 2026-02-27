@@ -80,10 +80,10 @@ INSTALLED_APPS = [
     #'markdownx', # <-- needed for adding markdown to forms
     "invoice", # Facture
     "devis.apps.DevisConfig", # quote devis
-    'customer', # customer
-    #'core.orders', # Orders
+    'customer.app.CustomerConfig', # customer
+    'core.orders', # Orders
     # local app
-    'immoshopy.apps.ImmoshopyConfig', # Immobilier
+    'immoshop.apps.ImmoshopyConfig', # Immobilier
     #'autocar.apps.AutoCarConfig', # Autocar
     'product.apps.ProductConfig', # Product
     'shop.apps.ShopConfig', # Shop

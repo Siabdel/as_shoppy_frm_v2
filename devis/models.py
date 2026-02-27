@@ -1,9 +1,5 @@
 from django.db import models
-
-# Create your models here.
 from django.contrib.auth import get_user_model
-
-from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from enum import Enum
@@ -63,6 +59,7 @@ class Quote(models.Model):
         return f"Devis {self.numero} - {self.get_statut_display()}"
 
     class Meta:
+        app_label = 'devis'
         verbose_name = _("Devis")
         verbose_name_plural = _("Devis")
 
@@ -98,14 +95,15 @@ class Quote(models.Model):
   
    
 class QuoteItem(models.Model):
-    quote = models.ForeignKey(Quote, related_name="items", on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, related_name="quote_items", on_delete=models.CASCADE)
+    quote = models.ForeignKey(Quote, related_name="quote_items", on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, related_name="product_items", on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     rate = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     tax = models.DecimalField(max_digits=6, decimal_places=2, default=0, null=True, blank=True)
 
     class Meta:
+        app_label = 'devis'
         verbose_name = _("Élément de devis")
         verbose_name_plural = _("Éléments de devis")
 
