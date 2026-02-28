@@ -1,0 +1,69 @@
+{% extends 'cmagic_sport/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Order Confirmed" %} - CMagic Sport{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <div class="mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="success" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+        </svg>
+    </div>
+    
+    <h1 class="mb-4">{% trans "Thank you for your order!" %}</h1>
+    
+    <p class="lead">{% trans "Your order has been placed successfully." %}</p>
+    
+    {% if order %}
+    <div class="card mx-auto" style="max-width: 600px;">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">{% trans "Order Details" %}</h5>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <tr>
+                    <td><strong>{% trans "Order Number" %}:</strong></td>
+                    <td>{{ order.order_number }}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Date" %}:</strong></td>
+                    <td>{{ order.created_at }}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Email" %}:</strong></td>
+                    <td>{{ order.customer_email }}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Payment Method" %}:</strong></td>
+                    <td>{{ order.payment_method }}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Delivery Method" %}:</strong></td>
+                    <td>{{ order.delivery_method }}</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Subtotal" %}:</strong></td>
+                    <td>{{ order.subtotal }} €</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Tax" %}:</strong></td>
+                    <td>{{ order.tax }} €</td>
+                </tr>
+                <tr>
+                    <td><strong>{% trans "Total" %}:</strong></td>
+                    <td><strong>{{ order.total }} €</strong></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="mt-4">
+        <p>{% trans "A confirmation email has been sent to your email address." %}</p>
+        <a href="{% url 'cmagic_sport:catalog' %}" class="btn btn-primary btn-lg">
+            {% trans "Continue Shopping" %}
+        </a>
+    </div>
+</div>
+{% endblock %}

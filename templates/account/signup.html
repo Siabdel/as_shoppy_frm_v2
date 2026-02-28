@@ -1,0 +1,115 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+{% load allauth account %}
+
+{% block head_title %}
+    {% trans "Créer un compte" %}
+{% endblock head_title %}
+
+{% block body %}
+<div class="login-card">
+    <div class="login-header">
+        <div class="brand-icon">🏀</div>
+        <h1>{% trans "Créer un compte" %}</h1>
+        <p class="subtitle">{% trans "Rejoignez CMagic Sport" %}</p>
+    </div>
+    
+    <div class="login-body">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% setvar link %}
+            <a href="{{ login_url }}">{% trans "connecter" %}</a>
+        {% endsetvar %}
+        {% setvar end_link %}
+        {% endsetvar %}
+        
+        <p class="text-muted mb-4">
+            {% blocktranslate %}Si vous avez déjà un compte, {{ link }}{{ end_link }} vous.{% endblocktranslate %}
+        </p>
+        
+        {% url 'account_signup' as signup_url %}
+        {% element form form=form method="post" action=signup_url tags="entrance,signup" %}
+            {% slot body %}
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+                
+                <div class="mb-3">
+                    <label for="id_email" class="form-label">{% trans "Email" %}</label>
+                    <input type="email" name="email" id="id_email" class="form-control" placeholder="votre@email.com" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_email2" class="form-label">{% trans "Confirmer l'email" %}</label>
+                    <input type="email" name="email2" id="id_email2" class="form-control" placeholder="votre@email.com" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_password1" class="form-label">{% trans "Mot de passe" %}</label>
+                    <input type="password" name="password1" id="id_password1" class="form-control" placeholder="••••••••" required>
+                    {% if form.password1.help_text %}
+                        <small class="form-text text-muted">{{ form.password1.help_text }}</small>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="id_password2" class="form-label">{% trans "Confirmer le mot de passe" %}</label>
+                    <input type="password" name="password2" id="id_password2" class="form-control" placeholder="••••••••" required>
+                </div>
+                
+                {% if form.terms %}
+                <div class="mb-3 form-check">
+                    {{ form.terms }}
+                    <label for="id_terms" class="form-check-label">
+                        {% trans "J'accepte les" %} <a href="/terms/">{% trans "conditions d'utilisation" %}</a>
+                    </label>
+                </div>
+                {% endif %}
+                
+                {{ redirect_field }}
+            {% endslot %}
+            
+            {% slot actions %}
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-person-plus me-2"></i>{% trans "Créer mon compte" %}
+                </button>
+            {% endslot %}
+        {% endelement %}
+        
+        {% if SOCIALACCOUNT_ENABLED %}
+            <hr class="my-4">
+            <div class="text-center">
+                <p class="text-muted mb-3">{% trans "Ou inscrivez-vous avec" %}</p>
+                {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="login-footer">
+        <p class="mb-0">
+            {% trans "Déjà client ?" %}
+            <a href="{{ login_url }}">{% trans "Se connecter" %}</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_body %}
+{{ block.super }}
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'cmagic_sport/base.html' %}
+{% load i18n %}
+{% load product_images %}
+
+{% block title %}{% trans "Catalog" %} - CMagic Sport{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">{% trans "Our Products" %}</h1>
+
+{% if products %}
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-4 mb-4">
+        <div class="card product-card">
+            {% product_image_url product as img_url %}
+            {% if img_url %}
+            <img src="{{ img_url }}" class="card-img-top" alt="{{ product.name }}">
+            {% else %}
+            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                <i class="bi bi-image text-white" style="font-size: 3rem;"></i>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text">{{ product.description|truncatewords:20 }}</p>
+                <p class="product-price">{{ product.price }} €</p>
+                <a href="{% url 'cmagic_sport:product_detail' product.slug %}" class="btn btn-primary">
+                    {% trans "View Details" %}
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if products.has_other_pages %}
+<nav>
+    <ul class="pagination">
+        {% if products.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ products.previous_page_number }}">Previous</a>
+        </li>
+        {% endif %}
+        <li class="page-item active">
+            <span class="page-link">{{ products.number }} / {{ products.paginator.num_pages }}</span>
+        </li>
+        {% if products.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ products.next_page_number }}">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="alert alert-info">
+    {% trans "No products available." %}
+</div>
+{% endif %}
+{% endblock %}

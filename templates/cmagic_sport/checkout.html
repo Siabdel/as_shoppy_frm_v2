@@ -1,0 +1,114 @@
+{% extends 'cmagic_sport/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Checkout" %} - CMagic Sport{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">{% trans "Checkout" %}</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <h3>{% trans "Billing Information" %}</h3>
+        <form method="post" action="{% url 'cmagic_sport:checkout' %}">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="first_name" class="form-label">{% trans "First Name" %} *</label>
+                    <input type="text" name="first_name" id="first_name" class="form-control" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="last_name" class="form-label">{% trans "Last Name" %} *</label>
+                    <input type="text" name="last_name" id="last_name" class="form-control" required>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">{% trans "Email" %} *</label>
+                <input type="email" name="email" id="email" class="form-control" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="phone" class="form-label">{% trans "Phone" %}</label>
+                <input type="tel" name="phone" id="phone" class="form-control">
+            </div>
+            
+            <div class="mb-3">
+                <label for="address" class="form-label">{% trans "Address" %} *</label>
+                <input type="text" name="address" id="address" class="form-control" required>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="city" class="form-label">{% trans "City" %} *</label>
+                    <input type="text" name="city" id="city" class="form-control" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="postal_code" class="form-label">{% trans "Postal Code" %} *</label>
+                    <input type="text" name="postal_code" id="postal_code" class="form-control" required>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="country" class="form-label">{% trans "Country" %} *</label>
+                <select name="country" id="country" class="form-select" required>
+                    <option value="">{% trans "Select Country" %}</option>
+                    <option value="FR" selected>France</option>
+                    <option value="BE">Belgium</option>
+                    <option value="CH">Switzerland</option>
+                    <option value="LU">Luxembourg</option>
+                </select>
+            </div>
+            
+            <h3 class="mt-4">{% trans "Payment Method" %}</h3>
+            
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="payment_method" id="payment_card" value="card" checked>
+                    <label class="form-check-label" for="payment_card">
+                        {% trans "Credit Card" %}
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="payment_method" id="payment_paypal" value="paypal">
+                    <label class="form-check-label" for="payment_paypal">
+                        PayPal
+                    </label>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-lg mt-4">
+                {% trans "Place Order" %}
+            </button>
+        </form>
+    </div>
+    
+    <div class="col-md-4">
+        <h3>{% trans "Order Summary" %}</h3>
+        {% if cart_items %}
+        <table class="table">
+            {% for item in cart_items %}
+            <tr>
+                <td>{{ item.product.name }} x {{ item.quantity }}</td>
+                <td>{{ item.get_total_price }} €</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td><strong>{% trans "Subtotal" %}:</strong></td>
+                <td><strong>{{ cart.get_subtotal }} €</strong></td>
+            </tr>
+            <tr>
+                <td>{% trans "Tax" %}:</td>
+                <td>{{ cart.get_tax }} €</td>
+            </tr>
+            <tr>
+                <td><strong>{% trans "Total" %}:</strong></td>
+                <td><strong>{{ cart.get_total }} €</strong></td>
+            </tr>
+        </table>
+        {% else %}
+        <p>{% trans "No items in cart." %}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+{% load allauth account %}
+
+{% block head_title %}
+    {% trans "Connexion" %}
+{% endblock head_title %}
+
+{% block body %}
+<div class="login-card">
+    <div class="login-header">
+        <div class="brand-icon">🏀</div>
+        <h1>{% trans "Connexion" %}</h1>
+        <p class="subtitle">{% trans "Accédez à votre compte CMagic Sport" %}</p>
+    </div>
+    
+    <div class="login-body">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% if not SOCIALACCOUNT_ONLY %}
+            {% setvar link %}
+                <a href="{{ signup_url }}">{% trans "créer un compte" %}</a>
+            {% endsetvar %}
+            {% setvar end_link %}
+            {% endsetvar %}
+            
+            <p class="text-muted mb-4">
+                {% blocktranslate %}Si vous n'avez pas encore de compte, {{ link }}{{ end_link }}.{% endblocktranslate %}
+            </p>
+            
+            {% url 'account_login' as login_url %}
+            {% element form form=form method="post" action=login_url tags="entrance,login" %}
+                {% slot body %}
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <div class="alert alert-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="id_login" class="form-label">{% trans "Email" %}</label>
+                        <input type="email" name="login" id="id_login" class="form-control" placeholder="votre@email.com" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label">{% trans "Mot de passe" %}</label>
+                        <input type="password" name="password" id="id_password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="remember" id="id_remember" class="form-check-input">
+                        <label for="id_remember" class="form-check-label">{% trans "Se souvenir de moi" %}</label>
+                    </div>
+                    
+                    {{ redirect_field }}
+                {% endslot %}
+                
+                {% slot actions %}
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>{% trans "Se connecter" %}
+                    </button>
+                {% endslot %}
+            {% endelement %}
+            
+            <div class="text-center mt-3">
+                <a href="{% url 'account_reset_password' %}" class="text-muted">
+                    {% trans "Mot de passe oublié ?" %}
+                </a>
+            </div>
+        {% endif %}
+        
+        {% if SOCIALACCOUNT_ENABLED %}
+            <hr class="my-4">
+            <div class="text-center">
+                <p class="text-muted mb-3">{% trans "Ou connectez-vous avec" %}</p>
+                {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="login-footer">
+        <p class="mb-0">
+            {% trans "Pas encore de client ?" %}
+            <a href="{{ signup_url }}">{% trans "Créer un compte" %}</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_body %}
+{{ block.super }}
+{% if PASSKEY_LOGIN_ENABLED %}
+    {% include "mfa/webauthn/snippets/login_script.html" with button_id="passkey_login" %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends "cmagic_sport/customer/base_customer.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Tableau de bord" %} - Espace Client{% endblock %}
+
+{% block customer_content %}
+<div class="customer-dashboard">
+    <!-- Welcome Header -->
+    <div class="dashboard-header mb-4">
+        <h2>{% trans "Bienvenue dans votre espace client" %}{% if customer %}, {{ customer.first_name }}{% endif %}!</h2>
+        <p class="text-muted">{% trans "Suivez vos commandes et gérez vos informations personnelles" %}</p>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stat-card stat-card-primary">
+                <div class="stat-icon">
+                    <i class="bi bi-bag-check"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ total_orders }}</h3>
+                    <p>{% trans "Total commandes" %}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card stat-card-warning">
+                <div class="stat-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ pending_orders }}</h3>
+                    <p>{% trans "En attente" %}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card stat-card-success">
+                <div class="stat-icon">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ delivered_orders }}</h3>
+                    <p>{% trans "Livrées" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="quick-actions">
+                <h5 class="mb-3"><i class="bi bi-lightning"></i> {% trans "Actions rapides" %}</h5>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{% url 'cmagic_sport:catalog' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-shop"></i> {% trans "Continuer mes achats" %}
+                    </a>
+                    <a href="{% url 'cmagic_sport:customer_orders' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-bag"></i> {% trans "Voir mes commandes" %}
+                    </a>
+                    <a href="{% url 'cmagic_sport:customer_profile' %}" class="btn btn-outline-info">
+                        <i class="bi bi-person-gear"></i> {% trans "Modifier mon profil" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Orders -->
+    <div class="recent-orders">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4><i class="bi bi-receipt"></i> {% trans "Dernières commandes" %}</h4>
+            <a href="{% url 'cmagic_sport:customer_orders' %}" class="btn btn-sm btn-link">
+                {% trans "Voir tout" %} <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        
+        {% if recent_orders %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>{% trans "Commande" %}</th>
+                        <th>{% trans "Date" %}</th>
+                        <th>{% trans "Statut" %}</th>
+                        <th>{% trans "Total" %}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td>
+                            <strong>{{ order.order_number }}</strong>
+                        </td>
+                        <td>{{ order.created_at|date:"d/m/Y" }}</td>
+                        <td>
+                            <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'shipped' %}info{% elif order.status == 'cancelled' %}danger{% else %}warning{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ order.total|floatformat:2 }} €</td>
+                        <td>
+                            <a href="{% url 'cmagic_sport:order_detail' order.order_number %}" 
+                               class="btn btn-sm btn-outline-primary">
+                                {% trans "Voir" %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state text-center py-5">
+            <i class="bi bi-bag-x display-1 text-muted"></i>
+            <h4 class="mt-3">{% trans "Aucune commande" %}</h4>
+            <p class="text-muted">{% trans "Vous n'avez pas encore passé de commande." %}</p>
+            <a href="{% url 'cmagic_sport:catalog' %}" class="btn btn-primary mt-2">
+                {% trans "Découvrir nos produits" %}
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.dashboard-header h2 {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-right: 1rem;
+}
+
+.stat-card-primary .stat-icon {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.stat-card-warning .stat-icon {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.stat-card-success .stat-icon {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.stat-card .stat-content h3 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.stat-card .stat-content p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.quick-actions {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.recent-orders {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.empty-state {
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+</style>
+{% endblock %}

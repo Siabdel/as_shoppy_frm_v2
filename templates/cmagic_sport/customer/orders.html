@@ -1,0 +1,275 @@
+{% extends "cmagic_sport/customer/base_customer.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Mes commandes" %} - Espace Client{% endblock %}
+
+{% block customer_content %}
+<div class="orders-page">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <h2><i class="bi bi-bag"></i> {% trans "Mes commandes" %}</h2>
+        <p class="text-muted">{% trans "Suivez et gérez l'ensemble de vos commandes" %}</p>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filters-bar mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <span class="text-muted">
+                    {% trans "Affichage de" %} {{ page_obj.start_index }} {% trans "à" %} {{ page_obj.end_index }}
+                    {% trans "sur" %} {{ paginator.count }} {% trans "commandes" %}
+                </span>
+            </div>
+            <div class="col-md-6">
+                <form method="get" class="d-flex gap-2">
+                    <select name="status" class="form-select" style="max-width: 200px;">
+                        <option value="">{% trans "Tous les statuts" %}</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>
+                            {% trans "En attente" %}
+                        </option>
+                        <option value="processing" {% if status_filter == 'processing' %}selected{% endif %}>
+                            {% trans "En cours" %}
+                        </option>
+                        <option value="shipped" {% if status_filter == 'shipped' %}selected{% endif %}>
+                            {% trans "Expédié" %}
+                        </option>
+                        <option value="delivered" {% if status_filter == 'delivered' %}selected{% endif %}>
+                            {% trans "Livré" %}
+                        </option>
+                        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>
+                            {% trans "Annulé" %}
+                        </option>
+                    </select>
+                    <button type="submit" class="btn btn-outline-secondary">
+                        <i class="bi bi-funnel"></i> {% trans "Filtrer" %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Orders List -->
+    {% if orders %}
+    <div class="orders-list">
+        {% for order in orders %}
+        <div class="order-card mb-3">
+            <div class="order-card-header">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-receipt"></i>
+                            {{ order.order_number }}
+                        </h5>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="text-muted">
+                            <i class="bi bi-calendar3"></i>
+                            {{ order.created_at|date:"d/m/Y H:i" }}
+                        </span>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="badge bg-{% if order.status == 'delivered' %}success{% elif order.status == 'shipped' %}info{% elif order.status == 'cancelled' %}danger{% elif order.status == 'processing' %}primary{% else %}warning{% endif %}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <strong class="h5 mb-0">{{ order.total|floatformat:2 }} €</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p class="mb-1">
+                            <i class="bi bi-box-seam"></i>
+                            <strong>{{ order.items.count }}</strong> 
+                            {% if order.items.count > 1 %}{% trans "articles" %}{% else %}{% trans "article" %}{% endif %}
+                        </p>
+                        <p class="text-muted mb-0">
+                            {% trans "Livraison à:" %} {{ order.shipping_city }}, {{ order.shipping_postal_code }}
+                        </p>
+                        
+                        <!-- Mini Status Progress -->
+                        <div class="order-progress mt-3">
+                            <div class="progress-steps">
+                                <div class="step {% if order.status != 'pending' and order.status != 'cancelled' %}completed{% elif order.status == 'pending' %}active{% endif %}">
+                                    <div class="step-icon"><i class="bi bi-check"></i></div>
+                                    <span>{% trans "Passée" %}</span>
+                                </div>
+                                <div class="step-line {% if order.status != 'pending' and order.status != 'cancelled' %}completed{% endif %}"></div>
+                                <div class="step {% if order.status == 'processing' %}active{% elif order.status == 'shipped' or order.status == 'delivered' %}completed{% endif %}">
+                                    <div class="step-icon"><i class="bi bi-gear"></i></div>
+                                    <span>{% trans "Préparée" %}</span>
+                                </div>
+                                <div class="step-line {% if order.status == 'shipped' or order.status == 'delivered' %}completed{% endif %}"></div>
+                                <div class="step {% if order.status == 'shipped' %}active{% elif order.status == 'delivered' %}completed{% endif %}">
+                                    <div class="step-icon"><i class="bi bi-truck"></i></div>
+                                    <span>{% trans "Expédiée" %}</span>
+                                </div>
+                                <div class="step-line {% if order.status == 'delivered' %}completed{% endif %}"></div>
+                                <div class="step {% if order.status == 'delivered' %}active{% endif %}">
+                                    <div class="step-icon"><i class="bi bi-check2-all"></i></div>
+                                    <span>{% trans "Livrée" %}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end d-flex align-items-end justify-content-end">
+                        <a href="{% url 'cmagic_sport:order_detail' order.order_number %}" 
+                           class="btn btn-primary">
+                            <i class="bi bi-eye"></i> {% trans "Voir le détail" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if paginator.num_pages > 1 %}
+    <nav aria-label="Pagination commandes" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    <i class="bi bi-chevron-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for num in paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    <i class="bi bi-chevron-double-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state text-center py-5">
+        <i class="bi bi-bag-x display-1 text-muted"></i>
+        <h4 class="mt-3">{% trans "Aucune commande trouvée" %}</h4>
+        <p class="text-muted">
+            {% if status_filter %}
+                {% trans "Aucune commande ne correspond au filtre sélectionné." %}
+            {% else %}
+                {% trans "Vous n'avez pas encore passé de commande." %}
+            {% endif %}
+        </p>
+        <a href="{% url 'cmagic_sport:catalog' %}" class="btn btn-primary mt-2">
+            {% trans "Découvrir nos produits" %}
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.order-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.order-card-header {
+    background: #f8f9fa;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.order-card-body {
+    padding: 1.5rem;
+}
+
+.progress-steps {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+}
+
+.step-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+    transition: all 0.3s ease;
+}
+
+.step.active .step-icon {
+    background: #667eea;
+    color: white;
+}
+
+.step.completed .step-icon {
+    background: #28a745;
+    color: white;
+}
+
+.step span {
+    font-size: 0.7rem;
+    color: #6c757d;
+}
+
+.step.active span {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.step-line {
+    flex: 1;
+    height: 2px;
+    background: #e9ecef;
+    margin: 0 4px;
+    max-width: 40px;
+}
+
+.step-line.completed {
+    background: #28a745;
+}
+
+.empty-state {
+    background: white;
+    border-radius: 12px;
+    padding: 3rem;
+}
+</style>
+{% endblock %}

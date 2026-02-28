@@ -1,0 +1,73 @@
+{% extends 'cmagic_sport/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Shopping Cart" %} - CMagic Sport{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">{% trans "Shopping Cart" %}</h1>
+
+{% if cart_items %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>{% trans "Product" %}</th>
+            <th>{% trans "Size" %}</th>
+            <th>{% trans "Quantity" %}</th>
+            <th>{% trans "Price" %}</th>
+            <th>{% trans "Total" %}</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in cart_items %}
+        <tr>
+            <td>
+                <a href="{% url 'cmagic_sport:product_detail' item.slug %}">
+                    {{ item.name }}
+                </a>
+            </td>
+            <td>{{ item.size }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.price }} €</td>
+            <td>{{ item.get_total_price }} €</td>
+            <td>
+                <form method="post" action="{% url 'cmagic_sport:cart' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="remove" value="{{ item.item_key }}">
+                    <button type="submit" class="btn btn-danger btn-sm">{% trans "Remove" %}</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="4" class="text-end"><strong>{% trans "Subtotal" %}:</strong></td>
+            <td><strong>{{ cart.get_subtotal }} €</strong></td>
+        </tr>
+        <tr>
+            <td colspan="4" class="text-end"><strong>{% trans "Tax" %}:</strong></td>
+            <td><strong>{{ cart.get_tax }} €</strong></td>
+        </tr>
+        <tr>
+            <td colspan="4" class="text-end"><strong>{% trans "Total" %}:</strong></td>
+            <td><strong>{{ cart.get_total }} €</strong></td>
+        </tr>
+    </tfoot>
+</table>
+
+<div class="text-end">
+    <a href="{% url 'cmagic_sport:checkout' %}" class="btn btn-primary btn-lg">
+        {% trans "Proceed to Checkout" %}
+    </a>
+</div>
+
+{% else %}
+<div class="alert alert-info">
+    <p>{% trans "Your cart is empty." %}</p>
+    <a href="{% url 'cmagic_sport:catalog' %}" class="btn btn-primary">
+        {% trans "Continue Shopping" %}
+    </a>
+</div>
+{% endif %}
+{% endblock %}

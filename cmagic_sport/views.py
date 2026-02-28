@@ -3,6 +3,7 @@
 Vues API pour CMagic Sport.
 """
 from django.db import models
+from django.contrib.auth.mixins import LoginRequiredMixin
 from rest_framework import viewsets, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -344,10 +345,10 @@ class ProductDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Get related products (same brand or type)
+        # Get related products (same product type)
         product = self.object
         related = SportProduct.objects.filter(
-            models.Q(brand=product.brand) | models.Q(product_type=product.product_type)
+            models.Q(product_type=product.product_type)
         ).exclude(id=product.id).filter(is_active=True)[:4]
         
         context['related_products'] = related
@@ -364,50 +365,241 @@ class CartView(TemplateView):
     """
     template_name = 'cmagic_sport/cart.html'
     
+    def get(self, request, *args, **kwargs):
+        """Handle GET requests - display the cart."""
+        return super().get(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        """Handle POST requests - add/remove items from cart."""
+        cart = request.session.get('cart', {})
+        
+        # Handle add to cart
+        if 'product_id' in request.POST:
+            product_id = request.POST.get('product_id')
+            size = request.POST.get('size', '')
+            quantity = int(request.POST.get('quantity', 1))
+            
+            # Get product details
+            from .models import SportProduct
+            product = SportProduct.objects.filter(id=product_id).first()
+            if product:
+                item_key = f"{product_id}_{size}" if size else str(product_id)
+                
+                if item_key in cart:
+                    cart[item_key]['quantity'] += quantity
+                else:
+                    cart[item_key] = {
+                        'product_id': product_id,
+                        'name': product.name,
+                        'size': size,
+                        'quantity': quantity,
+                        'price': float(product.price),
+                        'slug': product.slug,
+                    }
+                
+                request.session['cart'] = cart
+                request.session.modified = True
+        
+        # Handle remove item
+        elif 'remove' in request.POST:
+            item_id = request.POST.get('remove')
+            if item_id in cart:
+                del cart[item_id]
+                request.session['cart'] = cart
+                request.session.modified = True
+        
+        # Handle update quantity
+        elif 'update_quantity' in request.POST:
+            item_id = request.POST.get('item_id')
+            quantity = int(request.POST.get('quantity', 1))
+            if item_id in cart:
+                if quantity > 0:
+                    cart[item_id]['quantity'] = quantity
+                else:
+                    del cart[item_id]
+                request.session['cart'] = cart
+                request.session.modified = True
+        
+        # Redirect back to cart
+        from django.shortcuts import redirect
+        return redirect('cmagic_sport:cart')
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Get cart from session (mock for now)
+        # Get cart from session
+        request = self.request
+        cart = request.session.get('cart', {})
         cart_items = []
         cart_total = 0
         
-        # In a real app, this would get from session/database
-        # For demo, we'll show empty cart
+        # Build cart items list
+        for item_key, item_data in cart.items():
+            price = item_data.get('price', 0)
+            quantity = item_data.get('quantity', 1)
+            item_total = price * quantity
+            item_data['get_total_price'] = item_total
+            item_data['item_key'] = item_key
+            cart_items.append(item_data)
+            cart_total += item_total
+        
+        # Calculate totals
+        tax_rate = 0.20  # 20% VAT
+        tax = cart_total * tax_rate
+        total = cart_total + tax
+        
         context['cart_items'] = cart_items
         context['cart'] = {
-            'get_subtotal': 0,
-            'get_tax': 0,
-            'get_total': 0,
-            'get_total_price': 0,
+            'get_subtotal': cart_total,
+            'get_tax': tax,
+            'get_total': total,
+            'get_total_price': total,
         }
         
         return context
 
 
-class CheckoutView(TemplateView):
+class CheckoutView(LoginRequiredMixin, TemplateView):
     """
     Vue checkout/paiement.
     
     URL: /cmagic-sport/checkout/
     """
     template_name = 'cmagic_sport/checkout.html'
+    login_url = '/accounts/login/'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Mock cart items for demo
-        context['cart_items'] = []
+        # Get cart from session
+        from core.cart.cart import Cart
+        cart = Cart(self.request)
+        
+        # Get cart items
+        cart_items = []
+        cart_total = 0
+        
+        if hasattr(cart, 'cart') and cart.cart:
+            try:
+                for item in cart.cart.item_set.all():
+                    item_data = {
+                        'product': item.product,
+                        'quantity': item.quantity,
+                        'unit_price': item.unit_price,
+                        'total_price': item.total_price,
+                    }
+                    cart_items.append(item_data)
+                    cart_total += item.total_price
+            except Exception:
+                pass
+        
+        # Calculate totals
+        tax_rate = 0.20  # 20% VAT
+        tax = cart_total * tax_rate
+        total = cart_total + tax
+        
+        context['cart_items'] = cart_items
         context['cart'] = {
-            'get_subtotal': 0,
-            'get_tax': 0,
-            'get_total': 0,
+            'get_subtotal': cart_total,
+            'get_tax': tax,
+            'get_total': total,
+            'get_total_price': total,
         }
         
         return context
     
     def post(self, request, *args, **kwargs):
-        # Process checkout
-        # In a real app, this would handle payment processing
+        # Process checkout - create Order in database
+        from core.cart.cart import Cart
+        from django.utils import timezone
+        import uuid
+        
+        cart = Cart(request)
+        
+        # Get or create customer
+        customer = None
+        if hasattr(request.user, 'customer'):
+            customer = request.user.customer
+        else:
+            # Try to find by email
+            customer = Customer.objects.filter(
+                Q(created_by__email=request.user.email) |
+                Q(email=request.user.email)
+            ).first()
+        
+        if not customer:
+            messages.error(request, "Aucun client trouvé. Veuillez créer un compte client.")
+            return redirect('cmagic_sport:checkout')
+        
+        # Get cart items
+        if not hasattr(cart, 'cart') or not cart.cart:
+            messages.error(request, "Votre panier est vide.")
+            return redirect('cmagic_sport:cart')
+        
+        cart_items = list(cart.cart.item_set.all())
+        if not cart_items:
+            messages.error(request, "Votre panier est vide.")
+            return redirect('cmagic_sport:cart')
+        
+        # Calculate totals
+        subtotal = sum(item.total_price for item in cart_items)
+        tax = subtotal * 0.20
+        total = subtotal + tax
+        
+        # Generate order number
+        order_number = f"ORD-{timezone.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6].upper()}"
+        
+        # Get form data - use getattr to safely access customer fields
+        first_name = request.POST.get('first_name', getattr(customer, 'first_name', ''))
+        last_name = request.POST.get('last_name', getattr(customer, 'last_name', ''))
+        email = request.POST.get('email', getattr(customer, 'email', ''))
+        phone = request.POST.get('phone', str(getattr(customer, 'phone_number', '') or ''))
+        shipping_address = request.POST.get('address', getattr(customer, 'address1', ''))
+        shipping_city = request.POST.get('city', '')
+        shipping_postal_code = request.POST.get('zip_code', '')
+        shipping_country = request.POST.get('country', 'France')
+        
+        # Create Order
+        order = Order.objects.create(
+            order_number=order_number,
+            customer=customer,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone=phone,
+            shipping_address=shipping_address,
+            shipping_city=shipping_city,
+            shipping_postal_code=shipping_postal_code,
+            shipping_country=shipping_country,
+            subtotal=subtotal,
+            tax_amount=tax,
+            total=total,
+            status='pending',
+        )
+        
+        # Create OrderItems
+        for item in cart_items:
+            # Calculate total price (since OrderItem uses a property)
+            item_total = item.unit_price * item.quantity
+            OrderItem.objects.create(
+                order=order,
+                product=item.product if hasattr(item, 'product') else None,
+                product_name=item.product.name if hasattr(item, 'product') and item.product else 'Product',
+                product_sku=item.product.sku if hasattr(item, 'product') and item.product else '',
+                product_size=getattr(item, 'size', ''),
+                product_color=getattr(item, 'color', ''),
+                quantity=item.quantity,
+                unit_price=item.unit_price,
+            )
+        
+        # Clear the cart
+        cart.clear()
+        
+        # Store order number in session for success page
+        request.session['last_order_number'] = order_number
+        request.session['last_order_id'] = order.id
+        
+        messages.success(request, f"Commande {order_number} créée avec succès!")
         return redirect('cmagic_sport:checkout_success')
 
 
@@ -422,20 +614,294 @@ class CheckoutSuccessView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Mock order data for demo
-        context['order'] = {
-            'order_number': 'CMG-2024-001234',
-            'created_at': timezone.now(),
-            'customer_email': self.request.user.email if self.request.user.is_authenticated else 'client@email.com',
-            'payment_method': 'Carte bancaire',
-            'delivery_method': 'Livraison standard',
-            'total': 149.99,
-            'subtotal': 129.99,
-            'tax': 20.00,
-        }
+        # Get order from session
+        order_id = self.request.session.get('last_order_id')
+        if order_id:
+            try:
+                order = Order.objects.get(id=order_id)
+                context['order'] = order
+            except Order.DoesNotExist:
+                context['order'] = {
+                    'order_number': self.request.session.get('last_order_number', 'N/A'),
+                }
+        else:
+            context['order'] = {
+                'order_number': self.request.session.get('last_order_number', 'N/A'),
+            }
         
         return context
 
 
 # Import timezone for the success view
 from django.utils import timezone
+
+# ============================================
+# Espace Client - Vues pour le suivi des commandes
+# ============================================
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView, DetailView, UpdateView
+from django.contrib.auth import get_user_model
+from django.contrib import messages
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
+from django.http import JsonResponse
+
+from .models import Order, OrderItem
+from .serializers import OrderListSerializer, OrderDetailSerializer
+from customer.models import Customer
+
+User = get_user_model()
+
+
+class CustomerSpaceMixin(LoginRequiredMixin):
+    """
+    Mixin pour l'espace client - verifie que l'utilisateur est connecte
+    et recupere le client associe.
+    """
+    
+    def get_customer(self):
+        """Recupere le client associe a l'utilisateur connecte."""
+        if hasattr(self.request.user, 'customer'):
+            return self.request.user.customer
+        # Fallback: chercher par email
+        return Customer.objects.filter(
+            Q(created_by__email=self.request.user.email) |
+            Q(email=self.request.user.email)
+        ).first()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        customer = self.get_customer()
+        context['customer'] = customer
+        return context
+
+
+class CustomerDashboardView(CustomerSpaceMixin, TemplateView):
+    """
+    Tableau de bord de l'espace client.
+    
+    Affiche un resume des commandes etaccès rapide aux fonctions.
+    
+    URL: /cmagic-sport/account/
+    """
+    template_name = 'cmagic_sport/customer/dashboard.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        customer = self.get_customer()
+        
+        if customer:
+            # Recuperer les dernieres commandes
+            recent_orders = Order.objects.filter(
+                customer=customer
+            ).order_by('-created_at')[:5]
+            
+            # Statistiques
+            total_orders = Order.objects.filter(customer=customer).count()
+            pending_orders = Order.objects.filter(
+                customer=customer,
+                status='pending'
+            ).count()
+            delivered_orders = Order.objects.filter(
+                customer=customer,
+                status='delivered'
+            ).count()
+            
+            context['recent_orders'] = recent_orders
+            context['total_orders'] = total_orders
+            context['pending_orders'] = pending_orders
+            context['delivered_orders'] = delivered_orders
+        
+        return context
+
+
+class OrderListView(CustomerSpaceMixin, ListView):
+    """
+    Liste de toutes les commandes du client.
+    
+    URL: /cmagic-sport/account/orders/
+    """
+    model = Order
+    template_name = 'cmagic_sport/customer/orders.html'
+    context_object_name = 'orders'
+    paginate_by = 10
+    
+    def get_queryset(self):
+        customer = self.get_customer()
+        if not customer:
+            return Order.objects.none()
+        return Order.objects.filter(
+            customer=customer
+        ).order_by('-created_at')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Ajouter les filtres de statut
+        context['status_filter'] = self.request.GET.get('status', '')
+        return context
+
+
+class OrderDetailView(CustomerSpaceMixin, DetailView):
+    """
+    Detail d'une commande avec suivi.
+    
+    URL: /cmagic-sport/account/orders/<order_number>/
+    """
+    model = Order
+    template_name = 'cmagic_sport/customer/order_detail.html'
+    context_object_name = 'order'
+    lookup_field = 'order_number'
+    
+    def get_object(self):
+        customer = self.get_customer()
+        order_number = self.kwargs.get('order_number')
+        return get_object_or_404(
+            Order,
+            order_number=order_number,
+            customer=customer
+        )
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        order = self.object
+        
+        # Ajouter la progression du statut
+        context['status_progress'] = order.get_status_progress()
+        
+        # Ajouter les items de la commande
+        context['order_items'] = order.items.all()
+        
+        return context
+
+
+class CustomerProfileView(CustomerSpaceMixin, UpdateView):
+    """
+    Modification du profil client.
+    
+    URL: /cmagic-sport/account/profile/
+    """
+    template_name = 'cmagic_sport/customer/profile.html'
+    
+    def get_object(self):
+        return self.request.user
+    
+    def get_success_url(self):
+        messages.success(self.request, 'Profil mis à jour avec succès!')
+        return reverse('cmagic_sport:customer_profile')
+    
+    def get_form_class(self):
+        from django import forms
+        from customer.forms import UserChangeForm
+        return UserChangeForm
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'Vos informations ont été mises à jour.')
+        return super().form_valid(form)
+
+
+# ============================================
+# API Views pour l'Espace Client
+# ============================================
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+
+class CustomerOrderListAPIView(APIView):
+    """
+    API: Liste des commandes du client connecte.
+    
+    GET /api/v1/cmagic-sport/account/orders/
+    """
+    
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        customer = Customer.objects.filter(
+            Q(user__email=request.user.email) |
+            Q(email=request.user.email)
+        ).first()
+        
+        if not customer:
+            return Response(
+                {'error': 'Customer not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        orders = Order.objects.filter(customer=customer).order_by('-created_at')
+        
+        # Filtre par statut
+        status_filter = request.query_params.get('status')
+        if status_filter:
+            orders = orders.filter(status=status_filter)
+        
+        serializer = OrderListSerializer(orders, many=True)
+        return Response(serializer.data)
+
+
+class CustomerOrderDetailAPIView(APIView):
+    """
+    API: Detail d'une commande.
+    
+    GET /api/v1/cmagic-sport/account/orders/<order_number>/
+    """
+    
+    def get(self, request, order_number):
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        customer = Customer.objects.filter(
+            Q(user__email=request.user.email) |
+            Q(email=request.user.email)
+        ).first()
+        
+        if not customer:
+            return Response(
+                {'error': 'Customer not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        order = Order.objects.filter(
+            order_number=order_number,
+            customer=customer
+        ).first()
+        
+        if not order:
+            return Response(
+                {'error': 'Order not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = OrderDetailSerializer(order)
+        return Response(serializer.data)
+
+
+class OrderTrackingAPIView(APIView):
+    """
+    API: Suivi d'une commande par numero.
+    
+    GET /api/v1/cmagic-sport/track/<order_number>/
+    """
+    
+    def get(self, request, order_number):
+        order = Order.objects.filter(
+            order_number=order_number
+        ).first()
+        
+        if not order:
+            return Response(
+                {'error': 'Order not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = OrderDetailSerializer(order)
+        return Response(serializer.data)

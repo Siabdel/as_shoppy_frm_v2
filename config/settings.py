@@ -35,7 +35,7 @@ SECRET_KEY = 'jf$ac236s)uv)6xa&o0#@wmt+37zvlwf=atbi)%et^7=%3#$bb'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
@@ -94,6 +94,7 @@ INSTALLED_APPS = [
     'business.immo',      # Real Estate
     'business.retail',    # Retail E-commerce
     'business.auto',      # Automotive
+    'cmagic_sport',       # CMagic Sport E-commerce
     
     # Legacy apps (for migration)
     "invoice",
@@ -139,7 +140,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.shop_settings', ## new
-                #'core.context_processors.shop', ## new
+                'core.context_processors.shop', ## new
                 #'core.context_processors.customer', ## new
             ],
         },

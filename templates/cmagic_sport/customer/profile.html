@@ -1,0 +1,201 @@
+{% extends "cmagic_sport/customer/base_customer.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Mon profil" %} - Espace Client{% endblock %}
+
+{% block customer_content %}
+<div class="profile-page">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <h2><i class="bi bi-person-gear"></i> {% trans "Mon profil" %}</h2>
+        <p class="text-muted">{% trans "Gérez vos informations personnelles" %}</p>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Profile Form -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person"></i> {% trans "Informations du compte" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="profile-form">
+                        {% csrf_token %}
+                        
+                        <!-- Email (read-only) -->
+                        <div class="mb-3">
+                            <label class="form-label">{% trans "Email" %}</label>
+                            <input type="email" class="form-control" value="{{ user.email }}" readonly>
+                            <div class="form-text">{% trans "L'email ne peut pas être modifié." %}</div>
+                        </div>
+                        
+                        <!-- First Name -->
+                        <div class="mb-3">
+                            <label for="id_first_name" class="form-label">{% trans "Prénom" %}</label>
+                            <input type="text" name="first_name" id="id_first_name" 
+                                   class="form-control" value="{{ user.first_name|default:'' }}"
+                                   placeholder="{% trans 'Votre prénom' %}">
+                        </div>
+                        
+                        <!-- Last Name -->
+                        <div class="mb-3">
+                            <label for="id_last_name" class="form-label">{% trans "Nom" %}</label>
+                            <input type="text" name="last_name" id="id_last_name" 
+                                   class="form-control" value="{{ user.last_name|default:'' }}"
+                                   placeholder="{% trans 'Votre nom' %}">
+                        </div>
+                        
+                        <!-- Customer Info -->
+                        {% if customer %}
+                        <hr class="my-4">
+                        <h6 class="mb-3">{% trans "Informations supplémentaires" %}</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{% trans "Téléphone" %}</label>
+                                <input type="tel" class="form-control" 
+                                       value="{{ customer.phone|default:'' }}"
+                                       placeholder="{% trans 'Votre numéro de téléphone' %}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{% trans "Société" %}</label>
+                                <input type="text" class="form-control" 
+                                       value="{{ customer.company_name|default:'' }}"
+                                       placeholder="{% trans 'Nom de votre société' %}">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">{% trans "Adresse" %}</label>
+                            <textarea class="form-control" rows="2" 
+                                      placeholder="{% trans 'Votre adresse' %}">{{ customer.address|default:'' }}</textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{% trans "Ville" %}</label>
+                                <input type="text" class="form-control" 
+                                       value="{{ customer.city|default:'' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{% trans "Code postal" %}</label>
+                                <input type="text" class="form-control" 
+                                       value="{{ customer.postal_code|default:'' }}">
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="text-end mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg"></i> {% trans "Enregistrer les modifications" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Account Summary -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> {% trans "Résumé du compte" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="account-info">
+                        <div class="info-item mb-3">
+                            <span class="text-muted">{% trans "Membre depuis" %}</span>
+                            <p class="mb-0 fw-bold">{{ user.date_joined|date:"d/m/Y" }}</p>
+                        </div>
+                        <div class="info-item mb-3">
+                            <span class="text-muted">{% trans "Dernière connexion" %}</span>
+                            <p class="mb-0 fw-bold">{{ user.last_login|date:"d/m/Y H:i"|default:"-" }}</p>
+                        </div>
+                        <div class="info-item">
+                            <span class="text-muted">{% trans "Statut" %}</span>
+                            <p class="mb-0">
+                                <span class="badge bg-success">{% trans "Compte actif" %}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Links -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-link-45deg"></i> {% trans "Liens rapides" %}
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'cmagic_sport:customer_orders' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-bag me-2"></i> {% trans "Mes commandes" %}
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="bi bi-heart me-2"></i> {% trans "Mes favoris" %}
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="bi bi-geo-alt me-2"></i> {% trans "Mes adresses" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Security -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-shield-lock"></i> {% trans "Sécurité" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        {% trans "Protégez votre compte en utilisant un mot de passe fort." %}
+                    </p>
+                    <a href="{% url 'admin:password_change' %}" class="btn btn-outline-secondary btn-sm w-100">
+                        <i class="bi bi-key"></i> {% trans "Changer mon mot de passe" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-form .form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.profile-form .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+}
+
+.account-info .info-item {
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #eee;
+}
+
+.account-info .info-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.list-group-item {
+    border: none;
+    padding: 0.75rem 1rem;
+}
+
+.list-group-item-action:hover {
+    background: #f8f9fa;
+    color: #667eea;
+}
+</style>
+{% endblock %}
