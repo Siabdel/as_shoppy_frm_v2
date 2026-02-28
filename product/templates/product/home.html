@@ -1,0 +1,197 @@
+{% extends "product/base_cmagic.html" %}
+{% load static i18n %}
+
+{% block title %}CMagic Sport - Premium Basketball Shoes{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 animate-fade-in">
+                <h1 class="hero-title">
+                    Unleash Your <span>Game</span><br>
+                    With Premium Kicks
+                </h1>
+                <p class="hero-subtitle">
+                    Discover the latest basketball shoes from top brands. 
+                    Engineered for performance, designed for style.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'product:product_list' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-basket3"></i> Shop Now
+                    </a>
+                    <a href="#featured" class="btn btn-outline-light btn-lg">
+                        View Collection
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center mt-4 mt-lg-0 animate-fade-in animate-delay-2">
+                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=400&fit=crop" 
+                     alt="Basketball Shoes" 
+                     class="img-fluid rounded-4 shadow-lg"
+                     style="max-height: 400px; object-fit: cover;">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-4 fw-bold">Shop By Category</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="category-card">
+                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=300&fit=crop" alt="Men's">
+                    <div class="category-overlay">
+                        <span class="category-title">Men's Basketball</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="category-card">
+                    <img src="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&h=300&fit=crop" alt="Women's">
+                    <div class="category-overlay">
+                        <span class="category-title">Women's Basketball</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="category-card">
+                    <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=300&fit=crop" alt="Kids">
+                    <div class="category-overlay">
+                        <span class="category-title">Kids Basketball</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section id="featured" class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Featured Products</h2>
+            <p class="text-muted">Check out our most popular basketball shoes</p>
+        </div>
+        
+        <div class="row g-4">
+            {% for product in products|slice:8 %}
+            <div class="col-sm-6 col-lg-3">
+                <div class="product-card">
+                    {% if product.regular_price and product.regular_price > product.price %}
+                    <span class="badge-discount">
+                        SALE
+                    </span>
+                    {% endif %}
+                    
+                    <a href="{% url 'product:product_shop_detail' product.pk %}">
+                        <img src="{% if product.default_image %}{{ product.default_image.url }}{% else %}{% static 'img/default.jpg' %}{% endif %}"
+                             class="card-img-top"
+                             alt="{{ product.name }}">
+                    </a>
+                    
+                    <div class="card-body">
+                        <h5 class="product-title">
+                            <a href="{% url 'product:product_shop_detail' product.pk %}" class="text-decoration-none text-dark">
+                                {{ product.name|truncatechars:35 }}
+                            </a>
+                        </h5>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-tag"></i> {{ product.category.name|default:"Basketball" }}
+                        </p>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <span class="price">${{ product.price }}</span>
+                                {% if product.regular_price and product.regular_price > product.price %}
+                                <span class="old-price">${{ product.regular_price }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <form action="{% url 'cart:cart_add_item' product.id %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-sm w-100">
+                                    <i class="bi bi-cart-plus"></i> Add to Cart
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-basket display-1 text-muted"></i>
+                <h3 class="mt-3">No products available yet</h3>
+                <p class="text-muted">Run the management command to load sample data</p>
+                <a href="#" class="btn btn-primary mt-2">Load Sample Data</a>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{% url 'product:product_list' %}" class="btn btn-outline-primary btn-lg">
+                View All Products <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center" 
+                         style="width: 80px; height: 80px;">
+                        <i class="bi bi-truck fs-2 text-primary"></i>
+                    </div>
+                    <h4 class="mt-3 fw-bold">Free Shipping</h4>
+                    <p class="text-muted">On orders over $100</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center" 
+                         style="width: 80px; height: 80px;">
+                        <i class="bi bi-arrow-repeat fs-2 text-primary"></i>
+                    </div>
+                    <h4 class="mt-3 fw-bold">Easy Returns</h4>
+                    <p class="text-muted">30-day return policy</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center" 
+                         style="width: 80px; height: 80px;">
+                        <i class="bi bi-shield-check fs-2 text-primary"></i>
+                    </div>
+                    <h4 class="mt-3 fw-bold">Secure Payment</h4>
+                    <p class="text-muted">100% secure checkout</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="py-5 bg-dark">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 text-center">
+                <h3 class="fw-bold text-white mb-3">Subscribe to Our Newsletter</h3>
+                <p class="text-muted mb-4">Get the latest updates on new products and upcoming sales</p>
+                <form class="d-flex gap-2">
+                    <input type="email" class="form-control" placeholder="Enter your email" required>
+                    <button type="submit" class="btn btn-primary">
+                        Subscribe
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

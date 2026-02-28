@@ -19,29 +19,31 @@ from weasyprint import HTML
 from django.contrib import messages
 from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
-from core.orders.models import OrderItem
-from core.orders.forms import OrderCreateForm
+from core.orders.models import BaseOrderItemModel as OrderItem
+
+# Abstract models cannot be used directly - forms should be provided by business-specific apps
+# from core.orders.forms import OrderCreateForm
 from shop.models import ShopCart
 
 
-def order_create_session(request):
-    cart = ShopCart(request)
-    if request.method == 'POST':
-        form = OrderCreateForm(request.POST)
-        if form.is_valid():
-            order = form.save()
-            for item in cart:
-                OrderItem.objects.create(
-                    order=order,
-                    product=item['product'],
-                    price=item['price'],
-                    quantity=item['quantity']
-                )
-            cart.clear()
-        return render(request, 'orders/order/created.html', {'order': order})
-    else:
-        form = OrderCreateForm()
-    return render(request, 'orders/order/create.html', {'form': form})
+# def order_create_session(request):
+#     cart = ShopCart(request)
+#     if request.method == 'POST':
+#         form = OrderCreateForm(request.POST)
+#         if form.is_valid():
+#             order = form.save()
+#             for item in cart:
+#                 OrderItem.objects.create(
+#                     order=order,
+#                     product=item['product'],
+#                     price=item['price'],
+#                     quantity=item['quantity']
+#                 )
+#             cart.clear()
+#         return render(request, 'orders/order/created.html', {'order': order})
+#     else:
+#         form = OrderCreateForm()
+#     return render(request, 'orders/order/create.html', {'form': form})
 
 #-------------------------
 #- Genere pdf 

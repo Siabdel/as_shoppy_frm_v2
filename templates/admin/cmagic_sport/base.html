@@ -1,0 +1,151 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* CMagic Sport Admin Custom Styles */
+    :root {
+        --cmagic-primary: #ff6b35;
+        --cmagic-secondary: #1a1a2e;
+        --cmagic-accent: #00d9ff;
+    }
+    
+    /* Header */
+    #header {
+        background: linear-gradient(135deg, var(--cmagic-secondary) 0%, #16213e 100%);
+        color: white;
+    }
+    
+    #header a:link, #header a:visited {
+        color: white;
+    }
+    
+    #branding h1 {
+        color: white;
+        font-weight: 800;
+    }
+    
+    #branding h1:before {
+        content: "🏀 ";
+    }
+    
+    /* User tools */
+    #user-tools {
+        color: white;
+    }
+    
+    #user-tools a {
+        color: var(--cmagic-primary) !important;
+    }
+    
+    /* Login page */
+    .login #header {
+        background: var(--cmagic-secondary);
+    }
+    
+    /* Module headers */
+    .module h2, .module caption {
+        background: var(--cmagic-primary);
+        color: white;
+    }
+    
+    /* Button styles */
+    .button, input[type="submit"], input[type="reset"] {
+        background: var(--cmagic-primary);
+        border-color: var(--cmagic-primary);
+    }
+    
+    .button:hover, input[type="submit"]:hover, input[type="reset"]:hover {
+        background: #e55a2b;
+        border-color: #e55a2b;
+    }
+    
+    /* Primary button */
+    .button-default, input[type="submit"].default {
+        background: var(--cmagic-secondary);
+        border-color: var(--cmagic-secondary);
+    }
+    
+    /* Sidebar */
+    #changelist-filter {
+        background: #f8f9fa;
+    }
+    
+    #changelist-filter h2 {
+        background: var(--cmagic-secondary);
+        color: white;
+    }
+    
+    /* Table styles */
+    .results th {
+        background: var(--cmagic-secondary);
+        color: white;
+    }
+    
+    .results tr:nth-child(even) {
+        background: #f8f9fa;
+    }
+    
+    /* Status badges */
+    .status-badge {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 500;
+    }
+    
+    .status-available { background: #d4edda; color: #155724; }
+    .status-reserved { background: #fff3cd; color: #856404; }
+    .status-sold { background: #d1ecf1; color: #0c5460; }
+    .status-pending { background: #e2e3e5; color: #383d41; }
+    .status-unavailable { background: #f8d7da; color: #721c24; }
+    .status-coming { background: #cce5ff; color: #004085; }
+    
+    /* Dashboard stats */
+    .cmagic-stats-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .cmagic-stat-card {
+        flex: 1;
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .cmagic-stat-card h3 {
+        margin: 0;
+        color: var(--cmagic-primary);
+        font-size: 1.8rem;
+    }
+    
+    .cmagic-stat-card p {
+        margin: 0;
+        color: #666;
+        font-size: 0.85rem;
+    }
+    
+    /* Object tools */
+    .object-tools {
+        background: var(--cmagic-primary);
+    }
+    
+    .object-tools a {
+        background: var(--cmagic-primary);
+    }
+    
+    .object-tools a:hover {
+        background: #e55a2b;
+    }
+</style>
+{% endblock %}
+
+{% block navlinks %}
+<li><a href="{% url 'admin:index' %}" class="nav-link">{% trans 'Home' %}</li>
+<li><a href="{% url 'shop:product_list' %}" class="nav-link" target="_blank">{% trans 'View Site' %}</li>
+{% endblock %}

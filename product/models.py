@@ -41,7 +41,7 @@ class Product(base_models.BaseProduct):
         return self.images.all()
 
     def get_absolute_url(self):
-        return reverse("shop:product_detail", kwargs={'pk': self.pk})
+        return reverse("product:product_shop_detail", kwargs={'pk': self.pk})
     
     def get_edit_url(self):
         return reverse("shop:product_edit", kwargs={'pk': self.pk})

@@ -1,12 +1,13 @@
 
 # product/views.py
 from typing import Any
-from django.shortcuts import render
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, ListView
+from django.contrib import messages
+from django.utils import timezone
 from core.utils import get_product_model, Dict2Obj
 from product import models as pro_models
 from shop import models as msh_models 
@@ -153,3 +154,84 @@ def cart_summary(request):
     total = sum(item.total_price for item in cart_items)
     #return redirect('cart:cart_detail')
     return render(request, 'shop/cart_summary.html', {'cart_items': cart_items, 'total': total})
+
+
+# Delivery methods with pricing
+DELIVERY_METHODS = [
+    {'id': 'standard', 'name': 'Standard Delivery', 'price': 9.99, 'days': '5-7 business days'},
+    {'id': 'express', 'name': 'Express Delivery', 'price': 19.99, 'days': '2-3 business days'},
+    {'id': 'pickup', 'name': 'Store Pickup', 'price': 0, 'days': 'Same day (if ordered before 2pm)'},
+]
+
+
+def checkout(request):
+    """Checkout view for CMagic Sport"""
+    from core.cart.cart import Cart
+    
+    cart = Cart(request)
+    
+    if not cart:
+        messages.warning(request, "Your cart is empty.")
+        return redirect('cart:cart_detail')
+    
+    # Calculate totals
+    subtotal = cart.get_total_price()
+    shipping = 9.99 if subtotal < 100 else 0
+    tax = subtotal * 0.10  # 10% tax
+    total = subtotal + shipping + tax
+    
+    if request.method == 'POST':
+        # Process the checkout form
+        first_name = request.POST.get('first_name', '')
+        last_name = request.POST.get('last_name', '')
+        email = request.POST.get('email', '')
+        phone = request.POST.get('phone', '')
+        address = request.POST.get('address', '')
+        city = request.POST.get('city', '')
+        state = request.POST.get('state', '')
+        zip_code = request.POST.get('zip_code', '')
+        delivery_method = request.POST.get('delivery_method', 'standard')
+        payment_method = request.POST.get('payment_method', 'credit_card')
+        notes = request.POST.get('notes', '')
+        
+        # Get delivery cost
+        delivery_cost = 0
+        for method in DELIVERY_METHODS:
+            if method['id'] == delivery_method:
+                delivery_cost = method['price']
+                break
+        
+        # Calculate final total with selected delivery
+        final_total = subtotal + (delivery_cost if delivery_cost > 0 else 0) + tax
+        
+        # Create order (placeholder - would need Order model)
+        order_id = f"ORD-{timezone.now().strftime('%Y%m%d%H%M%S')}"
+        
+        # Clear the cart
+        cart.clear()
+        
+        # Redirect to success page
+        return render(request, 'shop/checkout_success.html', {
+            'order_id': order_id,
+            'first_name': first_name,
+            'email': email,
+            'total': final_total,
+            'delivery_method': delivery_method,
+            'payment_method': payment_method,
+        })
+    
+    # GET request - show checkout form
+    return render(request, 'shop/checkout_cmagic.html', {
+        'cart': cart,
+        'subtotal': subtotal,
+        'shipping': shipping,
+        'tax': tax,
+        'total': total,
+        'delivery_methods': DELIVERY_METHODS,
+    })
+
+
+def checkout_success(request):
+    """Order confirmation page"""
+    order_id = request.GET.get('order_id', 'N/A')
+    return render(request, 'shop/checkout_success.html', {'order_id': order_id})

@@ -1,0 +1,219 @@
+{% extends "product/base_cmagic.html" %}
+{% load static i18n %}
+
+{% block title %}Shop - CMagic Sport{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="bg-light py-4">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'product:product_list' %}" class="text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item active">Shop</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<!-- Products Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar Filters -->
+            <div class="col-lg-3">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-4">
+                            <i class="bi bi-funnel"></i> Filters
+                        </h5>
+                        
+                        <!-- Categories -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Categories</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="categoryAll" checked>
+                                <label class="form-check-label" for="categoryAll">All Products</label>
+                                <span class="badge bg-secondary float-end">{{ products|length }}</span>
+                            </div>
+                            {% for category in categories %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="category{{ category.pk }}">
+                                <label class="form-check-label" for="category{{ category.pk }}">{{ category.name }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Price Range -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Price Range</h6>
+                            <div class="range-slider">
+                                <input type="range" class="form-range" min="0" max="300" step="10" id="priceRange">
+                                <div class="d-flex justify-content-between mt-2">
+                                    <span>$0</span>
+                                    <span>$300+</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Brands -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Brand</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="nike">
+                                <label class="form-check-label" for="nike">Nike</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="adidas">
+                                <label class="form-check-label" for="adidas">Adidas</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="jordan">
+                                <label class="form-check-label" for="jordan">Jordan</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="underArmour">
+                                <label class="form-check-label" for="underArmour">Under Armour</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="puma">
+                                <label class="form-check-label" for="puma">Puma</label>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-outline-primary w-100">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reset Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Products Grid -->
+            <div class="col-lg-9">
+                <!-- Toolbar -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <p class="mb-0">Showing {{ products|length }} products</p>
+                    <div class="d-flex gap-2">
+                        <select class="form-select form-select-sm" style="width: auto;">
+                            <option>Sort by: Featured</option>
+                            <option>Price: Low to High</option>
+                            <option>Price: High to Low</option>
+                            <option>Newest First</option>
+                        </select>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-secondary btn-sm active">
+                                <i class="bi bi-grid-3x3-gap"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Products Grid -->
+                <div class="row g-4">
+                    {% for product in products %}
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="product-card h-100">
+                            {% if product.regular_price and product.regular_price > product.price %}
+                            <span class="badge-discount">
+                                SALE
+                            </span>
+                            {% endif %}
+                            
+                            <a href="{% url 'product:product_shop_detail' product.pk %}">
+                                <img src="{% if product.default_image %}{{ product.default_image.url }}{% else %}{% static 'img/default.jpg' %}{% endif %}" 
+                                     class="card-img-top" 
+                                     alt="{{ product.name }}">
+                            </a>
+                            
+                            <div class="card-body d-flex flex-column">
+                                <p class="text-muted small mb-1">
+                                    <i class="bi bi-tag"></i> {{ product.category.name|default:"Basketball Shoes" }}
+                                </p>
+                                <h5 class="product-title">
+                                    <a href="{% url 'product:product_shop_detail' product.pk %}" class="text-decoration-none text-dark">
+                                        {{ product.name|truncatechars:40 }}
+                                    </a>
+                                </h5>
+                                
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="text-warning small">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-half"></i>
+                                    </div>
+                                    <span class="text-muted small ms-2">({{ product.stock|add:50 }} reviews)</span>
+                                </div>
+                                
+                                <div class="d-flex align-items-center justify-content-between mb-3 mt-auto">
+                                    <div>
+                                        <span class="price">${{ product.price }}</span>
+                                        {% if product.regular_price and product.regular_price > product.price %}
+                                        <span class="old-price">${{ product.regular_price }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if product.stock > 0 %}
+                                    <span class="badge bg-success">In Stock</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <form action="{% url 'cart:cart_add_item' product.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-cart-plus"></i> Add to Cart
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center py-5">
+                        <i class="bi bi-basket display-1 text-muted"></i>
+                        <h3 class="mt-3">No Products Found</h3>
+                        <p class="text-muted">Try adjusting your filters or check back later</p>
+                        <a href="{% url 'product:product_list' %}" class="btn btn-primary mt-2">View All Products</a>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if products.has_other_pages %}
+                <nav aria-label="Products pagination" class="mt-5">
+                    <ul class="pagination justify-content-center">
+                        {% if products.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.previous_page_number }}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in products.paginator.page_range %}
+                            {% if products.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if products.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.next_page_number }}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

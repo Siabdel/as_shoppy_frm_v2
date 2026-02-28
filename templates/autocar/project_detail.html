@@ -34,7 +34,11 @@
     
     <div class="row mt-3">
         <div class="col-md-6">
+            {% if project.default_image %}
             <img src="{{ project.default_image.url }}" class="img-fluid" alt="{{ project.title }}">
+            {% else %}
+            <div class="alert alert-info">No image available</div>
+            {% endif %}
         </div>
         <div class="col-md-6">
             <h2> <a href="#"> {{ project.title }}  </a> </h2>

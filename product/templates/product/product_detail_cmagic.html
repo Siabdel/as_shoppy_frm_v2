@@ -1,0 +1,423 @@
+{% extends "product/base_cmagic.html" %}
+{% load static i18n %}
+
+{% block title %}{{ product.name }} - CMagic Sport{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<section class="bg-light py-3">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'product:product_list' %}" class="text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'product:product_list' %}" class="text-decoration-none">Products</a></li>
+                <li class="breadcrumb-item active">{{ product.name|truncatechars:20 }}</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<!-- Product Detail -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Product Images -->
+            <div class="col-lg-6 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        <div class="main-image-container position-relative">
+                            {% if product.default_image %}
+                            <img src="{{ product.default_image.url }}" 
+                                 alt="{{ product.name }}" 
+                                 class="img-fluid w-100"
+                                 style="height: 500px; object-fit: cover; border-radius: 10px;"
+                                 id="mainImage">
+                            {% else %}
+                            <img src="{% static 'img/default.jpg' %}" 
+                                 alt="{{ product.name }}" 
+                                 class="img-fluid w-100"
+                                 style="height: 500px; object-fit: cover; border-radius: 10px;"
+                                 id="mainImage">
+                            {% endif %}
+                            
+                            {% if product.regular_price and product.regular_price > product.price %}
+                            <span class="badge-discount position-absolute" style="top: 15px; left: 15px; font-size: 1rem;">
+                                SALE
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Thumbnail Gallery -->
+                        <div class="row g-2 mt-2">
+                            <div class="col-3">
+                                <img src="{% if product.default_image %}{{ product.default_image.url }}{% else %}{% static 'img/default.jpg' %}{% endif %}" 
+                                     class="img-thumbnail active" 
+                                     alt="Thumbnail 1"
+                                     onclick="changeImage(this.src)">
+                            </div>
+                            <div class="col-3">
+                                <img src="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=150&h=150&fit=crop" 
+                                     class="img-thumbnail" 
+                                     alt="Thumbnail 2"
+                                     onclick="changeImage(this.src)">
+                            </div>
+                            <div class="col-3">
+                                <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=150&h=150&fit=crop" 
+                                     class="img-thumbnail" 
+                                     alt="Thumbnail 3"
+                                     onclick="changeImage(this.src)">
+                            </div>
+                            <div class="col-3">
+                                <img src="https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=150&h=150&fit=crop" 
+                                     class="img-thumbnail" 
+                                     alt="Thumbnail 4"
+                                     onclick="changeImage(this.src)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Product Info -->
+            <div class="col-lg-6">
+                <div class="product-info">
+                    <p class="text-muted mb-1">
+                        <i class="bi bi-tag"></i> {{ product.category.name|default:"Basketball Shoes" }}
+                    </p>
+                    
+                    <h1 class="fw-bold mb-3">{{ product.name }}</h1>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="text-warning me-3">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                        </div>
+                        <span class="text-muted">({{ product.stock|add:50 }} customer reviews)</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <span class="price fs-2 fw-bold">${{ product.price }}</span>
+                        {% if product.regular_price and product.regular_price > product.price %}
+                        <span class="old-price fs-5 ms-3 text-decoration-line-through">${{ product.regular_price }}</span>
+                        <span class="badge bg-danger ms-2">SALE</span>
+                        {% endif %}
+                    </div>
+                    
+                    <p class="text-dark mb-4">{{ product.description }}</p>
+                    
+                    <!-- Stock Status -->
+                    <div class="mb-4">
+                        {% if product.stock > 0 %}
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-success me-2">In Stock</span>
+                            <span class="text-muted">{{ product.stock }} items available</span>
+                        </div>
+                        {% else %}
+                        <span class="badge bg-danger">Out of Stock</span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Product Code -->
+                    <div class="mb-4">
+                        <p class="text-muted mb-1">
+                            <i class="bi bi-upc"></i> Product Code: <strong>{{ product.product_code|default:"N/A" }}</strong>
+                        </p>
+                    </div>
+                    
+                    {% if product.stock > 0 %}
+                    <!-- Add to Cart Form -->
+                    <form action="{% url 'cart:cart_add_item' product.id %}" method="post" class="mb-4">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Quantity</label>
+                                <input type="number" name="quantity" class="form-control" value="1" min="1" max="{{ product.stock }}">
+                            </div>
+                            <div class="col-md-8 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="bi bi-cart-plus"></i> Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    {% else %}
+                    <button class="btn btn-secondary btn-lg w-100 mb-4" disabled>
+                        <i class="bi bi-cart-x"></i> Out of Stock
+                    </button>
+                    {% endif %}
+                    
+                    <!-- Quick Info -->
+                    <div class="row g-3 mt-2">
+                        <div class="col-6">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-truck text-primary fs-4 me-3"></i>
+                                <div>
+                                    <small class="d-block text-muted">Free Shipping</small>
+                                    <small class="fw-bold">On orders $100+</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-arrow-repeat text-primary fs-4 me-3"></i>
+                                <div>
+                                    <small class="d-block text-muted">Easy Returns</small>
+                                    <small class="fw-bold">30-day policy</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-shield-check text-primary fs-4 me-3"></i>
+                                <div>
+                                    <small class="d-block text-muted">Secure</small>
+                                    <small class="fw-bold">100% Protected</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-headset text-primary fs-4 me-3"></i>
+                                <div>
+                                    <small class="d-block text-muted">Support</small>
+                                    <small class="fw-bold">24/7 Available</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Product Tabs -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <ul class="nav nav-tabs mb-4" id="productTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button">
+                    Description
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs" type="button">
+                    Specifications
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button">
+                    Reviews ({{ product.stock|add:50 }})
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="productTabsContent">
+            <div class="tab-pane fade show active" id="description" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">Product Description</h4>
+                        <p class="text-dark">{{ product.description }}</p>
+                        <p class="text-dark">
+                            Experience ultimate performance on the court with our premium basketball shoes. 
+                            Designed with the latest technology and premium materials for maximum comfort, 
+                            support, and style.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i> Premium quality materials</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i> Advanced cushioning technology</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i> Excellent ankle support</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i> Durable outsole for indoor/outdoor use</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane fade" id="specs" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">Technical Specifications</h4>
+                        {% load product_extras %}
+                        <table class="table table-borderless">
+                            <tbody>
+                                {% get_product_specs product as spec_values %}
+                                {% if spec_values %}
+                                    {% for spec in spec_values %}
+                                    <tr>
+                                        <td class="fw-bold" style="width: 200px;">{{ spec.specification.name }}</td>
+                                        <td>{{ spec.value }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td class="fw-bold" style="width: 200px;">Brand</td>
+                                    <td>Premium Basketball</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Model</td>
+                                    <td>{{ product.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Category</td>
+                                    <td>{{ product.category.name|default:"Basketball Shoes" }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">SKU</td>
+                                    <td>{{ product.product_code|default:"N/A" }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Availability</td>
+                                    <td>
+                                        {% if product.stock > 0 %}
+                                        <span class="badge bg-success">In Stock ({{ product.stock }})</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Weight</td>
+                                    <td>0.5 kg</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane fade" id="reviews" role="tabpanel">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-4">Customer Reviews</h4>
+                        
+                        <!-- Rating Summary -->
+                        <div class="row mb-4">
+                            <div class="col-md-3 text-center">
+                                <div class="fs-1 fw-bold text-warning">{{ product.stock|add:50|divisibleby:10 }}.{{ product.stock|divisibleby:2 }}0</div>
+                                <div class="text-warning">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-half"></i>
+                                </div>
+                                <small class="text-muted">{{ product.stock|add:50 }} reviews</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Sample Reviews -->
+                        <div class="border-bottom pb-3 mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <h6 class="fw-bold mb-0">Amazing shoes!</h6>
+                                <div class="text-warning small">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                </div>
+                            </div>
+                            <p class="text-muted mb-1">Great quality and very comfortable. Highly recommend!</p>
+                            <small class="text-muted">John D. - Verified Buyer</small>
+                        </div>
+                        
+                        <div class="border-bottom pb-3 mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <h6 class="fw-bold mb-0">Worth the price</h6>
+                                <div class="text-warning small">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star"></i>
+                                </div>
+                            </div>
+                            <p class="text-muted mb-1">Great shoes for the price. Good support and looks great.</p>
+                            <small class="text-muted">Mike S. - Verified Buyer</small>
+                        </div>
+                        
+                        <button class="btn btn-outline-primary">
+                            <i class="bi bi-pencil-square"></i> Write a Review
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Related Products -->
+<section class="py-5">
+    <div class="container">
+        <h3 class="fw-bold mb-4">You May Also Like</h3>
+        <div class="row g-4">
+            {% for related in products|slice:4 %}
+            {% if related.id != product.id %}
+            <div class="col-sm-6 col-lg-3">
+                <div class="product-card">
+                    <a href="{% url 'product:product_shop_detail' related.pk %}">
+                        <img src="{% if related.default_image %}{{ related.default_image.url }}{% else %}{% static 'img/default.jpg' %}{% endif %}" 
+                             class="card-img-top" 
+                             alt="{{ related.name }}">
+                    </a>
+                    <div class="card-body">
+                        <h5 class="product-title">
+                            <a href="{% url 'product:product_shop_detail' related.pk %}" class="text-decoration-none text-dark">
+                                {{ related.name|truncatechars:30 }}
+                            </a>
+                        </h5>
+                        <span class="price">${{ related.price }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Image Gallery Script -->
+<script>
+function changeImage(src) {
+    document.getElementById('mainImage').src = src;
+    // Update active thumbnail
+    const thumbnails = document.querySelectorAll('.img-thumbnail');
+    thumbnails.forEach(thumb => {
+        thumb.classList.remove('active', 'border-primary');
+    });
+    event.target.classList.add('active', 'border-primary');
+}
+</script>
+
+<style>
+.img-thumbnail {
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+.img-thumbnail:hover,
+.img-thumbnail.active {
+    border-color: var(--cmagic-primary);
+}
+.nav-tabs .nav-link {
+    color: var(--cmagic-secondary);
+    font-weight: 500;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 10px 20px;
+}
+.nav-tabs .nav-link.active {
+    color: var(--cmagic-primary);
+    border-bottom-color: var(--cmagic-primary);
+    background: transparent;
+}
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+    border-bottom-color: var(--cmagic-primary);
+}
+</style>
+{% endblock %}

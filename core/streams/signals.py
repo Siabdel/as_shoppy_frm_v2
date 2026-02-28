@@ -10,7 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from .models import Stream, StreamEvent
 from .enums import EventType, StreamType
-from core.orders.models import Order
+from core.orders.models import BaseOrderModel as Order
 
 
 @receiver(post_save, sender='project.Project')

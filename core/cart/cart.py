@@ -76,8 +76,8 @@ class Cart(object):
         self.session.modified = True
 
     def remove(self, product):
-        # dell 
-        return sh_models.CartItem.objects.get(cart=self.cart, object_id=product.id).delete()
+        # dell
+        return sh_models.CartItem.objects.get(cart=self.cart, product_id=product.id).delete()
 
     def __iter_old_(self):
         product_ids = self.cart.keys()
@@ -124,7 +124,7 @@ class Cart(object):
     def cart_serializable(self):
         representation = {}
         for item in self.cart.item_set.all():
-            itemID = str(item.object_id)
+            itemID = str(item.product_id)
             itemToDict = {
                 'total_price': item.total_price,
                 'quantity': item.quantity

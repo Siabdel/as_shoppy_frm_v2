@@ -1,0 +1,104 @@
+{% extends "product/base_cmagic.html" %}
+{% load static i18n %}
+
+{% block title %}Order Confirmed - CMagic Sport{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<section class="bg-light py-3">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'shop:product_shop_list' %}" class="text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item active">Order Confirmed</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<!-- Success Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="text-center mb-5">
+                    <div class="mb-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h2 class="fw-bold mb-3">Thank You for Your Order!</h2>
+                    <p class="text-muted">Your order has been placed successfully.</p>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">Order Details</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>Order ID:</strong> 
+                                    <span class="text-primary">{{ order_id }}</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Customer:</strong> {{ first_name|default:"Customer" }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Email:</strong> {{ email|default:"N/A" }}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>Delivery Method:</strong> 
+                                    {{ delivery_method|default:"Standard Delivery"|title }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Payment Method:</strong> 
+                                    {% if payment_method == 'credit_card' %}
+                                        Credit/Debit Card
+                                    {% elif payment_method == 'paypal' %}
+                                        PayPal
+                                    {% elif payment_method == 'cash' %}
+                                        Cash on Delivery
+                                    {% else %}
+                                        {{ payment_method|title }}
+                                    {% endif %}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Total:</strong> 
+                                    <span class="fs-5 fw-bold text-primary">${{ total|default:"0.00" }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">What's Next?</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-envelope text-primary me-2"></i>
+                                A confirmation email has been sent to your email address.
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-truck text-primary me-2"></i>
+                                You will receive tracking information once your order is shipped.
+                            </li>
+                            <li class="mb-0">
+                                <i class="bi bi-headset text-primary me-2"></i>
+                                If you have any questions, please contact our support team.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <a href="{% url 'shop:product_shop_list' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-shop"></i> Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -36,9 +36,9 @@ urlpatterns = [
     # Unified API v1
     path('api/v1/', include('config.api_urls')),
     # apps local
+    path('', include('product.urls'), name='home'),
     path('proj/', include('project.urls'), name='proj_home'),
-    path('prod/', include('product.urls'), name='prod_home'),
-    #path('shop/', include('shop.urls'), name='sh_home'),
+    path('shop/', include('shop.urls'), name='sh_home'),
     path('cart/', include('core.cart.urls')),
     path("customer/", include("customer.urls")),
     # invoices

@@ -1,0 +1,226 @@
+{% extends "product/base_cmagic.html" %}
+{% load static i18n %}
+
+{% block title %}Checkout - CMagic Sport{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<section class="bg-light py-3">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'shop:product_list' %}" class="text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cart:cart_detail' %}" class="text-decoration-none">Cart</a></li>
+                <li class="breadcrumb-item active">Checkout</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<!-- Checkout Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="fw-bold mb-4">
+            <i class="bi bi-credit-card"></i> Checkout
+        </h2>
+        
+        <form method="post" action=".">
+            {% csrf_token %}
+            
+            <div class="row">
+                <!-- Billing Information -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-4">
+                                <i class="bi bi-person"></i> Billing Information
+                            </h5>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">First Name *</label>
+                                    <input type="text" name="first_name" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Last Name *</label>
+                                    <input type="text" name="last_name" class="form-control" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">Email Address *</label>
+                                    <input type="email" name="email" class="form-control" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">Phone Number *</label>
+                                    <input type="tel" name="phone" class="form-control" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">Address *</label>
+                                    <input type="text" name="address" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">City *</label>
+                                    <input type="text" name="city" class="form-control" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">State *</label>
+                                    <input type="text" name="state" class="form-control" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold">ZIP Code *</label>
+                                    <input type="text" name="zip_code" class="form-control" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Order Notes (Optional)</label>
+                                    <textarea name="notes" class="form-control" rows="3" placeholder="Special instructions for your order..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Delivery Method -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-4">
+                                <i class="bi bi-truck"></i> Delivery Method
+                            </h5>
+                            
+                            {% for method in delivery_methods %}
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio"
+                                       name="delivery_method" id="delivery_{{ method.id }}"
+                                       value="{{ method.id }}" {% if forloop.first %}checked{% endif %}>
+                                <label class="form-check-label fw-bold" for="delivery_{{ method.id }}">
+                                    <i class="bi bi-truck"></i> {{ method.name }}
+                                    {% if method.price == 0 %}
+                                    <span class="badge bg-success ms-2">FREE</span>
+                                    {% else %}
+                                    <span class="text-muted ms-2">${{ method.price }}</span>
+                                    {% endif %}
+                                </label>
+                                <p class="text-muted small mb-0 ms-4">{{ method.days }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Method -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-4">
+                                <i class="bi bi-credit-card"></i> Payment Method
+                            </h5>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="payment_method" id="creditCard" value="credit_card" checked>
+                                <label class="form-check-label fw-bold" for="creditCard">
+                                    <i class="bi bi-credit-card-2-front"></i> Credit / Debit Card
+                                </label>
+                            </div>
+                            
+                            <div class="card bg-light p-3 mb-3">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label">Card Number</label>
+                                        <input type="text" class="form-control" placeholder="1234 5678 9012 3456">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Expiry Date</label>
+                                        <input type="text" class="form-control" placeholder="MM/YY">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">CVV</label>
+                                        <input type="text" class="form-control" placeholder="123">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Name on Card</label>
+                                        <input type="text" class="form-control" placeholder="John Doe">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="payment_method" id="paypal" value="paypal">
+                                <label class="form-check-label fw-bold" for="paypal">
+                                    <i class="bi bi-paypal"></i> PayPal
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" id="cash" value="cash">
+                                <label class="form-check-label fw-bold" for="cash">
+                                    <i class="bi bi-cash"></i> Cash on Delivery
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Order Summary -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-4">Order Summary</h5>
+                            
+                            <!-- Cart Items -->
+                            {% for item in cart %}
+                            {% with product=item.product %}
+                            <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                                <img src="{% if product.default_image %}{{ product.default_image.url }}{% else %}{% static 'img/default.jpg' %}{% endif %}" 
+                                     alt="{{ product.name }}"
+                                     class="img-fluid rounded me-3"
+                                     style="width: 60px; height: 60px; object-fit: cover;">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0">{{ product.name|truncatechars:20 }}</h6>
+                                    <small class="text-muted">Qty: {{ item.quantity }} × ${{ item.price }}</small>
+                                </div>
+                                <span class="fw-bold">${{ item.total_price }}</span>
+                            </div>
+                            {% endwith %}
+                            {% endfor %}
+                            
+                            <!-- Summary -->
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Subtotal</span>
+                                <span class="fw-bold">${{ cart.get_total_price }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Shipping</span>
+                                <span class="fw-bold">
+                                    {% if cart.get_total_price > 100 %}
+                                    <span class="text-success">FREE</span>
+                                    {% else %}
+                                    $9.99
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Tax (10%)</span>
+                                <span class="fw-bold">${{ cart.get_total_price|divisibleby:10 }}</span>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="d-flex justify-content-between mb-4">
+                                <span class="fw-bold">Total</span>
+                                <span class="fs-4 fw-bold text-primary">
+                                    ${{ cart.get_total_price|add:cart.get_total_price|divisibleby:10|add:9.99 }}
+                                </span>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100 btn-lg">
+                                <i class="bi bi-lock"></i> Place Order
+                            </button>
+                            
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-shield-check"></i> Your payment is secure and encrypted
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
