@@ -111,20 +111,48 @@ class SportProductViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def brands(self, request):
-        """Retourne la liste des marques disponibles."""
-        brands = dict(SportProduct.BRAND_CHOICES)
-        return Response([
-            {'value': key, 'label': value}
-            for key, value in brands.items()
-        ])
+        """Retourne la liste des marques disponibles depuis les spécifications."""
+        from product.models import ProductSpecificationValue, ProductSpecification
+        from django.contrib.contenttypes.models import ContentType
+        
+        # Get SportProduct content type
+        sport_ct = ContentType.objects.get_for_model(SportProduct)
+        
+        # Get brands from ProductSpecificationValue where specification name is 'Brand'
+        brand_spec = ProductSpecification.objects.filter(name='Brand').first()
+        if brand_spec:
+            brand_values = ProductSpecificationValue.objects.filter(
+                product_content_type=sport_ct,
+                specification=brand_spec
+            ).values_list('value', flat=True).distinct()
+            brands = [{'value': b, 'label': b} for b in brand_values]
+        else:
+            # Fallback: get unique brand values directly from products
+            brands = SportProduct.objects.exclude(
+                brand=''
+            ).values_list('brand', flat=True).distinct()
+            brands = [{'value': b, 'label': b} for b in brands]
+        
+        return Response(brands)
     
     @action(detail=False, methods=['get'])
     def sizes(self, request):
-        """Retourne la liste des tailles EU disponibles."""
-        sizes = SportProduct.objects.exclude(
-            size_eu=''
-        ).values_list('size_eu', flat=True).distinct()
-        return Response(list(sizes))
+        """Retourne la liste des tailles disponibles."""
+        # Get unique sizes from available_sizes field
+        all_sizes = SportProduct.objects.exclude(
+            available_sizes=''
+        ).values_list('available_sizes', flat=True).distinct()
+        
+        # Parse and deduplicate sizes
+        size_set = set()
+        for sizes_str in all_sizes:
+            if sizes_str:
+                for size in sizes_str.split(','):
+                    size = size.strip()
+                    if size:
+                        size_set.add(size)
+        
+        return Response(sorted(list(size_set)))
     
     @action(detail=False, methods=['get'])
     def colors(self, request):
@@ -265,8 +293,32 @@ class CatalogView(TemplateView):
             products_page = paginator.page(paginator.num_pages)
         
         context['products'] = products_page
-        context['brands'] = SportProduct.BRAND_CHOICES
-        context['product_types'] = SportProduct.PRODUCT_TYPE_CHOICES
+        
+        # Get brands from specifications or products
+        from product.models import ProductSpecificationValue, ProductSpecification
+        from django.contrib.contenttypes.models import ContentType
+        
+        sport_ct = ContentType.objects.get_for_model(SportProduct)
+        
+        # Get unique brand values from ProductSpecificationValue
+        brand_spec = ProductSpecification.objects.filter(name='Brand').first()
+        if brand_spec:
+            brand_values = ProductSpecificationValue.objects.filter(
+                product_content_type=sport_ct,
+                specification=brand_spec
+            ).values_list('value', flat=True).distinct()
+            context['brands'] = [(b, b) for b in brand_values]
+        else:
+            # Fallback: get unique brand values directly from products
+            brand_values = SportProduct.objects.exclude(
+                brand=''
+            ).values_list('brand', flat=True).distinct()
+            context['brands'] = [(b, b) for b in brand_values]
+        
+        # Get product types from ProductType model
+        from product.models import ProductType
+        product_types = ProductType.objects.filter(is_active=True)
+        context['product_types'] = [(pt.id, pt.name) for pt in product_types]
         
         return context
 
