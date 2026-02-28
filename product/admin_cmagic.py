@@ -35,26 +35,15 @@ class CMagicAdminSite(admin.AdminSite):
 cmagic_admin_site = CMagicAdminSite(name='cmagic_admin')
 
 
-# Inlines
-class ProductSpecificationValueInline(TabularInline):
-    model = pro_models.ProductSpecificationValue
-    extra = 0
-    fields = ('specification', 'value')
-    autocomplete_fields = ['specification']
-
-
-class ProductImageInline(StackedInline):
-    model = pro_models.ProductImage
-    extra = 0
-    fields = ('title', 'image', 'is_primary')
-    readonly_fields = ('thumbnail_path',)
+# Inlines - Removed because ProductSpecificationValue and ProductImage
+# now use GenericForeignKey and cannot be used as inlines for Product
 
 
 # Product Admin with Enhanced Features
 @admin.register(pro_models.Product)
 class ProductAdmin(PolymorphicInlineSupportMixin, admin.ModelAdmin):
-    # Inlines
-    inlines = [ProductSpecificationValueInline, ProductImageInline]
+    # Inlines removed - these models now use GenericForeignKey
+    pass
     
     # List Display
     list_display = [
@@ -236,19 +225,20 @@ class ProductSpecificationAdmin(admin.ModelAdmin):
 @admin.register(pro_models.ProductSpecificationValue)
 class ProductSpecificationValueAdmin(admin.ModelAdmin):
     list_display = ['product', 'specification', 'value']
-    list_filter = ['specification', 'product__category']
+    list_filter = ['specification', 'product_content_type']
     search_fields = ['value', 'product__name']
-    autocomplete_fields = ['product', 'specification']
+    autocomplete_fields = ['product_content_type', 'specification']
 
 
 # Product Image Admin
 @admin.register(pro_models.ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ['title', 'product', 'is_primary', 'created_at']
-    list_filter = ['created_at', 'product__category']
+    list_filter = ['created_at', 'product_content_type']
     search_fields = ['title', 'product__name']
     readonly_fields = ('thumbnail_path', 'large_path')
-    fields = ('title', 'product', 'image', 'is_primary')
+    fields = ('title', 'product_content_type', 'product_object_id', 'image', 'is_primary')
+    autocomplete_fields = ['product_content_type']
 
 
 # Custom CSS for Admin

@@ -1,0 +1,540 @@
+{% extends 'cmagic_sport/base.html' %}
+{% load static %}
+
+{% block title %}Paiement - CMagic Sport{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-header {
+        background: linear-gradient(135deg, var(--cmagic-secondary) 0%, #2d2d2d 100%);
+        padding: 40px 0;
+        margin-bottom: 40px;
+    }
+    
+    .checkout-steps {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 20px;
+    }
+    
+    .checkout-step {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: rgba(255,255,255,0.5);
+    }
+    
+    .checkout-step.active {
+        color: #fff;
+    }
+    
+    .checkout-step.completed {
+        color: var(--cmagic-primary);
+    }
+    
+    .checkout-step .step-number {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 2px solid currentColor;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .checkout-step.active .step-number,
+    .checkout-step.completed .step-number {
+        background: currentColor;
+        color: var(--cmagic-secondary);
+    }
+    
+    .checkout-step.completed .step-number {
+        background: var(--cmagic-primary);
+        border-color: var(--cmagic-primary);
+    }
+    
+    .checkout-form {
+        background: #fff;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+    }
+    
+    .checkout-form h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--cmagic-primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-floating {
+        margin-bottom: 20px;
+    }
+    
+    .form-floating > .form-control:focus,
+    .form-floating > .form-select:focus {
+        border-color: var(--cmagic-primary);
+        box-shadow: 0 0 0 0.25rem rgba(255,107,0,0.1);
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--cmagic-primary);
+        border-color: var(--cmagic-primary);
+    }
+    
+    .order-summary {
+        background: #fff;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        position: sticky;
+        top: 100px;
+    }
+    
+    .order-summary h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--cmagic-primary);
+    }
+    
+    .order-item {
+        display: flex;
+        gap: 15px;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    
+    .order-item-image {
+        width: 70px;
+        height: 70px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #f8f9fa;
+    }
+    
+    .order-item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .order-item-details h5 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .order-item-details .text-muted {
+        font-size: 0.85rem;
+    }
+    
+    .order-item-price {
+        font-weight: 600;
+        color: var(--cmagic-primary);
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .summary-row.total {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-top: 20px;
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+    
+    .summary-row.total .amount {
+        color: var(--cmagic-primary);
+        font-size: 1.6rem;
+    }
+    
+    .payment-methods {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .payment-option {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        border: 2px solid #ddd;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .payment-option:hover {
+        border-color: var(--cmagic-primary);
+    }
+    
+    .payment-option.selected {
+        border-color: var(--cmagic-primary);
+        background: rgba(255,107,0,0.05);
+    }
+    
+    .payment-option input {
+        margin-right: 15px;
+    }
+    
+    .payment-option .icon {
+        font-size: 1.5rem;
+        margin-right: 15px;
+        color: var(--cmagic-gray);
+    }
+    
+    .payment-option .label {
+        font-weight: 600;
+    }
+    
+    .secure-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        color: var(--cmagic-gray);
+        font-size: 0.9rem;
+        margin-top: 20px;
+    }
+    
+    .secure-badge i {
+        color: var(--cmagic-success);
+    }
+    
+    .delivery-option {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border: 2px solid #ddd;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .delivery-option:hover,
+    .delivery-option.selected {
+        border-color: var(--cmagic-primary);
+    }
+    
+    .delivery-option input {
+        margin-right: 15px;
+    }
+    
+    .delivery-option .price {
+        margin-left: auto;
+        font-weight: 600;
+        color: var(--cmagic-primary);
+    }
+    
+    .delivery-option .price.free {
+        color: var(--cmagic-success);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="checkout-header">
+    <div class="container">
+        <h1 class="text-white mb-2">
+            <i class="fas fa-lock me-3"></i>Paiement Sécurisé
+        </h1>
+        
+        <!-- Steps -->
+        <div class="checkout-steps">
+            <div class="checkout-step completed">
+                <span class="step-number"><i class="fas fa-check"></i></span>
+                <span>Panier</span>
+            </div>
+            <div class="checkout-step active">
+                <span class="step-number">2</span>
+                <span>Informations</span>
+            </div>
+            <div class="checkout-step">
+                <span class="step-number">3</span>
+                <span>Paiement</span>
+            </div>
+            <div class="checkout-step">
+                <span class="step-number">4</span>
+                <span>Confirmation</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Checkout Content -->
+<div class="container pb-5">
+    <form method="post" action="{% url 'cmagic_sport:process_checkout' %}">
+        {% csrf_token %}
+        
+        <div class="row g-5">
+            <!-- Left Column - Forms -->
+            <div class="col-lg-8">
+                <!-- Contact Info -->
+                <div class="checkout-form">
+                    <h3><i class="fas fa-user"></i> Informations de contact</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="firstName" name="first_name" placeholder="Prénom" required>
+                                <label for="firstName">Prénom</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="lastName" name="last_name" placeholder="Nom" required>
+                                <label for="lastName">Nom</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+                                <label for="email">Email</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="Téléphone">
+                                <label for="phone">Téléphone</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Shipping Address -->
+                <div class="checkout-form">
+                    <h3><i class="fas fa-shipping-fast"></i> Adresse de livraison</h3>
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="address" name="address" placeholder="Adresse" required>
+                        <label for="address">Adresse</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="address2" name="address2" placeholder="Complément d'adresse">
+                        <label for="address2">Complément d'adresse (optionnel)</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="postalCode" name="postal_code" placeholder="Code postal" required>
+                                <label for="postalCode">Code postal</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="city" name="city" placeholder="Ville" required>
+                                <label for="city">Ville</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select class="form-select" id="country" name="country">
+                                    <option value="FR" selected>France</option>
+                                    <option value="BE">Belgique</option>
+                                    <option value="CH">Suisse</option>
+                                    <option value="LU">Luxembourg</option>
+                                </select>
+                                <label for="country">Pays</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Delivery Method -->
+                <div class="checkout-form">
+                    <h3><i class="fas fa-truck"></i> Mode de livraison</h3>
+                    
+                    <label class="delivery-option selected">
+                        <input type="radio" name="delivery" value="standard" checked>
+                        <div>
+                            <div class="fw-bold">Livraison standard</div>
+                            <small class="text-muted">5-7 jours ouvrés</small>
+                        </div>
+                        <span class="price free">Gratuit</span>
+                    </label>
+                    
+                    <label class="delivery-option">
+                        <input type="radio" name="delivery" value="express">
+                        <div>
+                            <div class="fw-bold">Livraison express</div>
+                            <small class="text-muted">24-48h</small>
+                        </div>
+                        <span class="price">9.90 €</span>
+                    </label>
+                    
+                    <label class="delivery-option">
+                        <input type="radio" name="delivery" value="relay">
+                        <div>
+                            <div class="fw-bold">Point relais</div>
+                            <small class="text-muted">3-5 jours ouvrés</small>
+                        </div>
+                        <span class="price">4.90 €</span>
+                    </label>
+                </div>
+                
+                <!-- Payment Method -->
+                <div class="checkout-form">
+                    <h3><i class="fas fa-credit-card"></i> Mode de paiement</h3>
+                    
+                    <div class="payment-methods">
+                        <label class="payment-option selected">
+                            <input type="radio" name="payment" value="card" checked>
+                            <i class="fab fa-cc-visa icon"></i>
+                            <i class="fab fa-cc-mastercard icon"></i>
+                            <span class="label">Carte bancaire</span>
+                        </label>
+                        
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="paypal">
+                            <i class="fab fa-paypal icon"></i>
+                            <span class="label">PayPal</span>
+                        </label>
+                        
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="apple">
+                            <i class="fab fa-apple-pay icon"></i>
+                            <span class="label">Apple Pay</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Card Form (shown when card is selected) -->
+                    <div id="cardForm" class="mt-4">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="cardNumber" placeholder="Numéro de carte" required>
+                                    <label for="cardNumber">Numéro de carte</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="cardExpiry" placeholder="MM/AA" required>
+                                    <label for="cardExpiry">Date d'expiration (MM/AA)</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="cardCVC" placeholder="CVC" required>
+                                    <label for="cardCVC">Cryptogramme (CVC)</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="cardName" placeholder="Nom sur la carte" required>
+                            <label for="cardName">Nom sur la carte</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column - Order Summary -->
+            <div class="col-lg-4">
+                <div class="order-summary">
+                    <h3>Résumé de la commande</h3>
+                    
+                    {% for item in cart_items %}
+                    <div class="order-item">
+                        <div class="order-item-image">
+                            {% if item.product.default_image %}
+                            <img src="{{ item.product.default_image.url }}" alt="{{ item.product.name }}">
+                            {% else %}
+                            <img src="https://via.placeholder.com/70x70?text=CMagic" alt="{{ item.product.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="order-item-details flex-grow-1">
+                            <h5>{{ item.product.name }}</h5>
+                            <div class="text-muted">Qté: {{ item.quantity }}</div>
+                        </div>
+                        <div class="order-item-price">
+                            {{ item.get_total_price|floatformat:2 }} €
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="summary-row">
+                        <span>Sous-total</span>
+                        <span>{{ cart.get_subtotal|floatformat:2 }} €</span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Livraison</span>
+                        <span>Gratuite</span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>TVA</span>
+                        <span>{{ cart.get_tax|floatformat:2 }} €</span>
+                    </div>
+                    
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span class="amount">{{ cart.get_total|floatformat:2 }} €</span>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-cmagic w-100">
+                        <i class="fas fa-lock me-2"></i>Payer {{ cart.get_total|floatformat:2 }} €
+                    </button>
+                    
+                    <div class="secure-badge">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Paiement 100% sécurisé</span>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            En commandant, vous acceptez nos CGV
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Payment method selection
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+            this.querySelector('input').checked = true;
+        });
+    });
+    
+    // Delivery method selection
+    document.querySelectorAll('.delivery-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.delivery-option').forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+            this.querySelector('input').checked = true;
+        });
+    });
+</script>
+{% endblock %}

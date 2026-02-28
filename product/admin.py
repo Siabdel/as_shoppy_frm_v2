@@ -19,9 +19,10 @@ class ProductSpecificationInline(admin.TabularInline):
     extra = 0
 
 
-class ProductSpecificationValueInline(admin.TabularInline):
-    model = pro_models.ProductSpecificationValue
-    extra = 0
+# Inline removed - ProductSpecificationValue now uses GenericForeignKey
+# class ProductSpecificationValueInline(admin.TabularInline):
+#     model = pro_models.ProductSpecificationValue
+#     extra = 0
 
 
 @admin.register(pro_models.ProductType)
@@ -42,23 +43,24 @@ class ProductSpecificationAdmin(admin.ModelAdmin):
 @admin.register(pro_models.ProductSpecificationValue)
 class ProductSpecificationValueAdmin(admin.ModelAdmin):
     list_display = ['product', 'specification', 'value']
-    list_filter = ['specification']
+    list_filter = ['specification', 'product_content_type']
     search_fields = ['value', 'product__name']
 
 
 @admin.register(pro_models.ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
     list_display = ['title', 'product', 'created_at']
-    list_filter = ['created_at']
+    list_filter = ['created_at', 'product_content_type']
     search_fields = ['title', 'product__name']
     readonly_fields = ['thumbnail_path', 'large_path']
 
 
-class ProductImageInline(StackedInline):
-    model = pro_models.ProductImage
-    readonly_fields = ('thumbnail_path', 'large_path')
-    fields = ('title', 'image')
-    extra = 0
+# Inline removed - ProductImage now uses GenericForeignKey
+# class ProductImageInline(StackedInline):
+#     model = pro_models.ProductImage
+#     readonly_fields = ('thumbnail_path', 'large_path')
+#     fields = ('title', 'image')
+#     extra = 0
 
 
 class ProductImageAdminMixin:
@@ -138,7 +140,7 @@ class ProductImageAdminMixin:
 
 @admin.register(pro_models.Product)
 class ProductAdmin(PolymorphicInlineSupportMixin, ProductImageAdminMixin, admin.ModelAdmin):
-    inlines = [ProductSpecificationValueInline, ProductImageInline]
+    # Inlines removed - these models now use GenericForeignKey
     list_display = [
         'product_code', 'name', 'project', 'category',
         'status', 'price', 'stock', 'available', 

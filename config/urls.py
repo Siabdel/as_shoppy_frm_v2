@@ -41,6 +41,8 @@ urlpatterns = [
     path('shop/', include('shop.urls'), name='sh_home'),
     path('cart/', include('core.cart.urls')),
     path("customer/", include("customer.urls")),
+    # CMagic Sport - Boutique baskets
+    path('cmagic-sport/', include('cmagic_sport.urls')), # new
     # invoices
     path("invoice/", include('invoice.urls')),
     path('devis/', include('devis.urls')),  # Devis

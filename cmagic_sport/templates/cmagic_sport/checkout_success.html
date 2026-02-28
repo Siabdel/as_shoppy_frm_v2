@@ -1,0 +1,343 @@
+{% extends 'cmagic_sport/base.html' %}
+{% load static %}
+
+{% block title %}Commande Confirmée - CMagic Sport{% endblock %}
+
+{% block extra_css %}
+<style>
+    .success-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        padding: 60px 0;
+    }
+    
+    .success-icon {
+        width: 120px;
+        height: 120px;
+        background: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        animation: scaleIn 0.5s ease;
+    }
+    
+    @keyframes scaleIn {
+        0% { transform: scale(0); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    
+    .success-icon i {
+        font-size: 3.5rem;
+        color: #28a745;
+    }
+    
+    .order-info {
+        background: #fff;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        margin-top: -30px;
+    }
+    
+    .order-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--cmagic-primary);
+        margin-bottom: 20px;
+    }
+    
+    .order-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .order-detail-item {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .order-detail-item .label {
+        font-size: 0.85rem;
+        color: var(--cmagic-gray);
+        margin-bottom: 5px;
+    }
+    
+    .order-detail-item .value {
+        font-weight: 600;
+    }
+    
+    .order-summary-box {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .order-product {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .order-product:last-child {
+        border-bottom: none;
+    }
+    
+    .order-product-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+    }
+    
+    .order-product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .order-product-info h5 {
+        font-size: 0.95rem;
+        margin-bottom: 3px;
+    }
+    
+    .order-product-info .text-muted {
+        font-size: 0.85rem;
+    }
+    
+    .order-product-price {
+        font-weight: 600;
+        color: var(--cmagic-primary);
+        margin-left: auto;
+    }
+    
+    .next-steps {
+        background: #fff;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+    
+    .next-steps h4 {
+        margin-bottom: 20px;
+    }
+    
+    .step-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .step-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(255,107,0,0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--cmagic-primary);
+        flex-shrink: 0;
+    }
+    
+    .step-content h6 {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .step-content p {
+        font-size: 0.9rem;
+        color: var(--cmagic-gray);
+        margin: 0;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Success Header -->
+<div class="success-header">
+    <div class="container text-center">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <h1 class="text-white mb-2">Merci pour votre commande !</h1>
+        <p class="text-white-50 mb-0">
+            Votre commande a été enregistrée avec succès
+        </p>
+    </div>
+</div>
+
+<!-- Order Info -->
+<div class="container pb-5">
+    <div class="order-info" data-aos="fade-up">
+        <div class="text-center">
+            <div class="order-number">
+                Commande #{{ order.order_number|default:"CMG-2024-001234" }}
+            </div>
+            <p class="text-muted mb-4">
+                Un email de confirmation a été envoyé à <strong>{{ order.customer_email|default:"client@email.com" }}</strong>
+            </p>
+        </div>
+        
+        <!-- Order Details Grid -->
+        <div class="order-details">
+            <div class="order-detail-item">
+                <div class="label">Date de commande</div>
+                <div class="value">{{ order.created_at|date:"d/m/Y"|default:"28/02/2024" }}</div>
+            </div>
+            <div class="order-detail-item">
+                <div class="label">Mode de paiement</div>
+                <div class="value">{{ order.payment_method|default:"Carte bancaire" }}</div>
+            </div>
+            <div class="order-detail-item">
+                <div class="label">Mode de livraison</div>
+                <div class="value">{{ order.delivery_method|default:"Livraison standard" }}</div>
+            </div>
+            <div class="order-detail-item">
+                <div class="label">Total TTC</div>
+                <div class="value" style="color: var(--cmagic-primary);">{{ order.total|floatformat:2|default:"149.99" }} €</div>
+            </div>
+        </div>
+        
+        <!-- Order Products -->
+        <h5 class="mb-3">Produits commandés</h5>
+        <div class="order-summary-box">
+            {% for item in order.items|default:order_items %}
+            <div class="order-product">
+                <div class="order-product-image">
+                    {% if item.product.default_image %}
+                    <img src="{{ item.product.default_image.url }}" alt="{{ item.product.name }}">
+                    {% else %}
+                    <img src="https://via.placeholder.com/60x60?text=CMagic" alt="{{ item.product.name }}">
+                    {% endif %}
+                </div>
+                <div class="order-product-info">
+                    <h5>{{ item.product.name|default:"Nike Air Max" }}</h5>
+                    <div class="text-muted">Taille: {{ item.size|default:"42" }} | Qté: {{ item.quantity|default:1 }}</div>
+                </div>
+                <div class="order-product-price">
+                    {{ item.price|default:"129.99"|floatformat:2 }} €
+                </div>
+            </div>
+            {% empty %}
+            <div class="order-product">
+                <div class="order-product-image">
+                    <img src="https://via.placeholder.com/60x60?text=CMagic" alt="Produit">
+                </div>
+                <div class="order-product-info">
+                    <h5>Nike Air Max 90</h5>
+                    <div class="text-muted">Taille: 42 | Qté: 1</div>
+                </div>
+                <div class="order-product-price">129.99 €</div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Shipping Address -->
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="mb-3">Adresse de livraison</h5>
+                <div class="p-3 bg-light rounded">
+                    <strong>{{ order.shipping_name|default:"John Doe" }}</strong><br>
+                    {{ order.shipping_address|default:"123 Rue de la Paix" }}<br>
+                    {{ order.shipping_postal|default:"75001" }} {{ order.shipping_city|default:"Paris" }}<br>
+                    {{ order.shipping_country|default:"France" }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h5 class="mb-3">Résumé financier</h5>
+                <div class="p-3 bg-light rounded">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Sous-total</span>
+                        <span>{{ order.subtotal|default:"129.99"|floatformat:2 }} €</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Livraison</span>
+                        <span class="text-success">Gratuite</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>TVA</span>
+                        <span>{{ order.tax|default:"20.00"|floatformat:2 }} €</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong>Total</strong>
+                        <strong style="color: var(--cmagic-primary);">{{ order.total|default:"149.99"|floatformat:2 }} €</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Next Steps -->
+    <div class="next-steps mt-4" data-aos="fade-up" data-aos-delay="100">
+        <h4>Prochaines étapes</h4>
+        
+        <div class="step-item">
+            <div class="step-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="step-content">
+                <h6>Email de confirmation</h6>
+                <p>Vous recevrez un email de confirmation avec le numéro de votre commande.</p>
+            </div>
+        </div>
+        
+        <div class="step-item">
+            <div class="step-icon">
+                <i class="fas fa-box"></i>
+            </div>
+            <div class="step-content">
+                <h6>Préparation de la commande</h6>
+                <p>Notre équipe prépare votre commande avec le plus grand soin.</p>
+            </div>
+        </div>
+        
+        <div class="step-item">
+            <div class="step-icon">
+                <i class="fas fa-truck"></i>
+            </div>
+            <div class="step-content">
+                <h6>Expédition</h6>
+                <p>Vous recevrez un email avec le numéro de suivi dès l'expédition.</p>
+            </div>
+        </div>
+        
+        <div class="step-item">
+            <div class="step-icon">
+                <i class="fas fa-home"></i>
+            </div>
+            <div class="step-content">
+                <h6>Livraison</h6>
+                <p>Votre commande sera livrée à l'adresse indiquée sous 5-7 jours ouvrés.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'cmagic_sport:catalog' %}" class="btn btn-cmagic">
+            <i class="fas fa-shopping-bag me-2"></i>Continuer mes achats
+        </a>
+        <a href="#" class="btn btn-outline-secondary">
+            <i class="fas fa-file-invoice me-2"></i>Télécharger la facture
+        </a>
+    </div>
+</div>
+{% endblock %}

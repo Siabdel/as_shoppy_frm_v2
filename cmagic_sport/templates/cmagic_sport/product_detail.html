@@ -1,0 +1,567 @@
+{% extends 'cmagic_sport/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - CMagic Sport{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-gallery {
+        position: sticky;
+        top: 100px;
+    }
+    
+    .main-image {
+        border-radius: 20px;
+        overflow: hidden;
+        background: #f8f9fa;
+        aspect-ratio: 1;
+    }
+    
+    .main-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .thumbnail-list {
+        display: flex;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .thumbnail {
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .thumbnail:hover,
+    .thumbnail.active {
+        border-color: var(--cmagic-primary);
+    }
+    
+    .thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .product-badges {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .product-badges .badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+    
+    .product-badges .badge.sale {
+        background: var(--cmagic-danger);
+    }
+    
+    .product-badges .badge.new {
+        background: var(--cmagic-accent);
+    }
+    
+    .product-badges .badge.limited {
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        color: #000;
+    }
+    
+    .size-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+        margin: 20px 0;
+    }
+    
+    .size-btn {
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        background: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    
+    .size-btn:hover:not(.disabled) {
+        border-color: var(--cmagic-primary);
+    }
+    
+    .size-btn.selected {
+        background: var(--cmagic-primary);
+        border-color: var(--cmagic-primary);
+        color: #fff;
+    }
+    
+    .size-btn.disabled {
+        background: #f5f5f5;
+        color: #ccc;
+        cursor: not-allowed;
+        text-decoration: line-through;
+    }
+    
+    .quantity-control {
+        display: inline-flex;
+        align-items: center;
+        border: 2px solid #ddd;
+        border-radius: 30px;
+        overflow: hidden;
+    }
+    
+    .quantity-control button {
+        width: 45px;
+        height: 45px;
+        border: none;
+        background: #fff;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .quantity-control button:hover {
+        background: var(--cmagic-primary);
+        color: #fff;
+    }
+    
+    .quantity-control input {
+        width: 60px;
+        text-align: center;
+        border: none;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    
+    .product-tabs {
+        margin-top: 60px;
+    }
+    
+    .nav-tabs-cmagic {
+        border-bottom: 2px solid #eee;
+        margin-bottom: 30px;
+    }
+    
+    .nav-tabs-cmagic .nav-link {
+        border: none;
+        padding: 15px 30px;
+        font-weight: 600;
+        color: var(--cmagic-gray);
+        position: relative;
+    }
+    
+    .nav-tabs-cmagic .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--cmagic-primary);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .nav-tabs-cmagic .nav-link:hover {
+        color: var(--cmagic-primary);
+    }
+    
+    .nav-tabs-cmagic .nav-link.active {
+        color: var(--cmagic-primary);
+    }
+    
+    .nav-tabs-cmagic .nav-link.active::after {
+        transform: scaleX(1);
+    }
+    
+    .related-products .product-card {
+        height: 100%;
+    }
+    
+    @media (max-width: 768px) {
+        .size-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        
+        .product-gallery {
+            position: static;
+            margin-bottom: 30px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="py-3 bg-light">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'cmagic_sport:catalog' %}">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cmagic_sport:catalog' %}?brand={{ product.brand }}">{{ product.get_brand_display }}</a></li>
+                <li class="breadcrumb-item active">{{ product.name }}</li>
+            </ol>
+        </nav>
+    </div>
+</nav>
+
+<!-- Product Detail -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Gallery -->
+            <div class="col-lg-6">
+                <div class="product-gallery">
+                    <div class="main-image">
+                        {% if product.default_image %}
+                        <img src="{{ product.default_image.url }}" alt="{{ product.name }}" id="mainImage">
+                        {% else %}
+                        <img src="https://via.placeholder.com/600x600?text=CMagic+Sport" alt="{{ product.name }}" id="mainImage">
+                        {% endif %}
+                    </div>
+                    
+                    {% if product.default_image %}
+                    <div class="thumbnail-list">
+                        <div class="thumbnail active">
+                            <img src="{{ product.default_image.url }}" alt="{{ product.name }}" onclick="changeImage(this)">
+                        </div>
+                        <!-- Additional thumbnails would go here -->
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Info -->
+            <div class="col-lg-6">
+                <div class="product-detail-info">
+                    <!-- Badges -->
+                    <div class="product-badges">
+                        {% if product.is_season_promo %}
+                        <span class="badge sale">-{{ product.season_promo_discount }}%</span>
+                        {% endif %}
+                        {% if product.is_limited_edition %}
+                        <span class="badge limited">Édition Limitée</span>
+                        {% endif %}
+                        {% if product.collection_year %}
+                        <span class="badge new">Collection {{ product.collection_year }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Brand & Name -->
+                    <div class="brand">{{ product.get_brand_display }}</div>
+                    <h1>{{ product.name }}</h1>
+                    
+                    <!-- Price -->
+                    <div class="price-block mb-4">
+                        <span class="price">{{ product.get_price|floatformat:2 }} €</span>
+                        {% if product.regular_price and product.regular_price > product.price %}
+                        <span class="old-price">{{ product.regular_price|floatformat:2 }} €</span>
+                        <span class="discount-badge">-{{ product|discount_percentage }}%</span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Description -->
+                    <p class="text-muted mb-4">{{ product.description|truncatewords:30 }}</p>
+                    
+                    <!-- Color -->
+                    {% if product.color %}
+                    <div class="mb-4">
+                        <h6 class="mb-2">Couleur: <strong>{{ product.color }}</strong></h6>
+                        <div class="d-flex gap-2">
+                            <span class="color-swatch" style="width: 30px; height: 30px; border-radius: 50%; background: {{ product.color|lower }}; border: 2px solid #ddd;"></span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Size -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">Taille EU</h6>
+                            <a href="#" class="text-decoration-none small" data-bs-toggle="modal" data-bs-target="#sizeGuide">
+                                <i class="fas fa-ruler me-1"></i>Guide des tailles
+                            </a>
+                        </div>
+                        <div class="size-grid">
+                            {% for size in available_sizes %}
+                            <button class="size-btn {% if size in product.sizes_unavailable %}disabled{% endif %}"
+                                    data-size="{{ size }}"
+                                    onclick="selectSize(this, '{{ size }}')">
+                                {{ size }}
+                            </button>
+                            {% empty %}
+                            {% for i in "38,39,40,41,42,43,44,45"|split:"," %}
+                            <button class="size-btn" data-size="{{ i }}" onclick="selectSize(this, '{{ i }}')">
+                                {{ i }}
+                            </button>
+                            {% endfor %}
+                        {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Quantity -->
+                    <div class="mb-4">
+                        <h6 class="mb-2">Quantité</h6>
+                        <div class="quantity-control">
+                            <button onclick="decreaseQuantity()"><i class="fas fa-minus"></i></button>
+                            <input type="number" id="quantity" value="1" min="1" max="{{ product.stock }}">
+                            <button onclick="increaseQuantity()"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <span class="ms-3 text-muted">
+                            <i class="fas fa-box me-1"></i>
+                            {% if product.stock > 0 %}
+                            {{ product.stock }} en stock
+                            {% else %}
+                            Rupture de stock
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="d-flex gap-3 mb-4">
+                        <button class="btn btn-cmagic flex-grow-1" onclick="addToCart()" {% if product.stock == 0 %}disabled{% endif %}>
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            {% if product.stock > 0 %}Ajouter au panier{% else %}Rupture de stock{% endif %}
+                        </button>
+                        <button class="btn btn-outline-danger rounded-circle" style="width: 50px; height: 50px;">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary rounded-circle" style="width: 50px; height: 50px;">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Features -->
+                    <div class="features-list">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-shipping-fast text-primary me-3"></i>
+                            <span>Livraison gratuite dès 100€</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-undo text-primary me-3"></i>
+                            <span>Retours gratuits sous 30 jours</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-shield-alt text-primary me-3"></i>
+                            <span>Garantie 2 ans</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-headset text-primary me-3"></i>
+                            <span>Support client 24/7</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="product-tabs">
+            <ul class="nav nav-tabs-cmagic" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#description">
+                        Description
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#details">
+                        Détails
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#reviews">
+                        Avis (0)
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="description">
+                    <div class="py-3">
+                        <h4 class="mb-3">{{ product.name }}</h4>
+                        <p>{{ product.detailed_description|default:product.description }}</p>
+                        
+                        {% if product.technologies %}
+                        <h5 class="mt-4">Technologies</h5>
+                        <p>{{ product.technologies }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="tab-pane fade" id="details">
+                    <div class="py-3">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <td class="text-muted">Marque</td>
+                                    <td><strong>{{ product.get_brand_display }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Type de produit</td>
+                                    <td><strong>{{ product.get_product_type_display }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Genre</td>
+                                    <td><strong>{{ product.get_gender_display }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Matériau</td>
+                                    <td><strong>{{ product.get_material_display }}</strong></td>
+                                </tr>
+                                {% if product.colorway %}
+                                <tr>
+                                    <td class="text-muted">Coloris</td>
+                                    <td><strong>{{ product.colorway }}</strong></td>
+                                </tr>
+                                {% endif %}
+                                {% if product.style_code %}
+                                <tr>
+                                    <td class="text-muted">Code style</td>
+                                    <td><strong>{{ product.style_code }}</strong></td>
+                                </tr>
+                                {% endif %}
+                                {% if product.product_code %}
+                                <tr>
+                                    <td class="text-muted">Référence</td>
+                                    <td><strong>{{ product.product_code }}</strong></td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="tab-pane fade" id="reviews">
+                    <div class="py-3 text-center">
+                        <i class="fas fa-star text-muted fa-3x mb-3"></i>
+                        <h5>Aucun avis pour le moment</h5>
+                        <p class="text-muted">Soyez le premier à donner votre avis sur ce produit</p>
+                        <button class="btn btn-cmagic">Donner mon avis</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Related Products -->
+        {% if related_products %}
+        <div class="related-products mt-5">
+            <h3 class="mb-4">Produits Similaires</h3>
+            <div class="row g-4">
+                {% for related in related_products %}
+                <div class="col-sm-6 col-lg-3">
+                    <div class="product-card">
+                        <div class="product-image">
+                            {% if related.default_image %}
+                            <img src="{{ related.default_image.url }}" alt="{{ related.name }}">
+                            {% else %}
+                            <img src="https://via.placeholder.com/300x300?text=CMagic" alt="{{ related.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="product-info">
+                            <div class="product-brand">{{ related.get_brand_display }}</div>
+                            <a href="{% url 'cmagic_sport:product_detail' related.slug %}" class="text-decoration-none">
+                                <h4 class="product-name">{{ related.name }}</h4>
+                            </a>
+                            <div class="product-price">
+                                <span class="current-price">{{ related.get_price|floatformat:2 }} €</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Size Guide Modal -->
+<div class="modal fade" id="sizeGuide" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Guide des tailles</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>EU</th>
+                            <th>US</th>
+                            <th>UK</th>
+                            <th>Longueur (cm)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>38</td><td>6</td><td>5</td><td>24</td></tr>
+                        <tr><td>39</td><td>7</td><td>6</td><td>25</td></tr>
+                        <tr><td>40</td><td>8</td><td>7</td><td>26</td></tr>
+                        <tr><td>41</td><td>9</td><td>8</td><td>27</td></tr>
+                        <tr><td>42</td><td>10</td><td>9</td><td>28</td></tr>
+                        <tr><td>43</td><td>11</td><td>10</td><td>29</td></tr>
+                        <tr><td>44</td><td>12</td><td>11</td><td>30</td></tr>
+                        <tr><td>45</td><td>13</td><td>12</td><td>31</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let selectedSize = null;
+    
+    function selectSize(btn, size) {
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedSize = size;
+    }
+    
+    function changeImage(thumb) {
+        document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+        thumb.parentElement.classList.add('active');
+        document.getElementById('mainImage').src = thumb.src;
+    }
+    
+    function increaseQuantity() {
+        const input = document.getElementById('quantity');
+        const max = parseInt(input.max);
+        if (parseInt(input.value) < max) {
+            input.value = parseInt(input.value) + 1;
+        }
+    }
+    
+    function decreaseQuantity() {
+        const input = document.getElementById('quantity');
+        if (parseInt(input.value) > 1) {
+            input.value = parseInt(input.value) - 1;
+        }
+    }
+    
+    function addToCart() {
+        if (!selectedSize) {
+            alert('Veuillez sélectionner une taille');
+            return;
+        }
+        
+        const quantity = document.getElementById('quantity').value;
+        
+        // Show loading
+        showToast('Ajout au panier...', 'success');
+        
+        // In a real app, this would be an AJAX call
+        setTimeout(() => {
+            showToast('Produit ajouté au panier !', 'success');
+        }, 1000);
+    }
+</script>
+{% endblock %}

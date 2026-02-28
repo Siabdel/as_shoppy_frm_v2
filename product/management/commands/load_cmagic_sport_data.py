@@ -13,6 +13,7 @@ from django.utils.text import slugify
 from django.contrib.contenttypes.models import ContentType
 from core.taxonomy.models import MPCategory
 from product.models import Product, ProductImage, ProductType, ProductSpecification, ProductSpecificationValue
+from cmagic_sport.models import SportProduct
 from project.models import Project
 from core.profile.models import Societe
 

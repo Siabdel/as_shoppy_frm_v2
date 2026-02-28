@@ -72,14 +72,68 @@ class ProductSpecification(models.Model):
         return self.name
     
 class ProductSpecificationValue(PolymorphicModel):
-    """ The product specification value table hold each of the 
+    """ The product specification value table hold each of the
     product individal specification or bespoke features.
+    
+    Uses GenericForeignKey to support any product type (polymorphic).
     """
-    product = models.ForeignKey(Product, verbose_name=_(""), on_delete=models.CASCADE)
+    # Generic foreign key to support any product type
+    product_content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='specification_values'
+    )
+    product_object_id = models.PositiveIntegerField(null=True, blank=True)
+    product = GenericForeignKey(
+        'product_content_type',
+        'product_object_id',
+        'product'
+    )
+    
     category = deferred.ForeignKey(MPCategory, related_name='products', null=True, blank=True, on_delete=models.CASCADE)
     specification = models.ForeignKey(ProductSpecification, on_delete=models.RESTRICT)
     value   = models.CharField(_("Value"), max_length=255)
     
+    class Meta:
+        verbose_name = _("Product Specification Value")
+        verbose_name_plural = _("Product Specification Values")
+        indexes = [
+            models.Index(fields=['product_content_type', 'product_object_id']),
+        ]
+    
+    def __str__(self):
+        return f"{self.specification}: {self.value}"
+
 
 class ProductImage(base_models.BaseImage):
-    product = models.ForeignKey(Product, related_name="images", on_delete=models.CASCADE)
+    """Product images using GenericForeignKey to support any product type."""
+    # Generic foreign key to support any product type
+    product_content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='product_images'
+    )
+    product_object_id = models.PositiveIntegerField(null=True, blank=True)
+    product = GenericForeignKey(
+        'product_content_type',
+        'product_object_id',
+        'product'
+    )
+    
+    # Primary image flag
+    is_primary = models.BooleanField(
+        default=False,
+        verbose_name=_('Image principale'),
+        help_text=_('Cocher pour définir cette image comme image principale du produit')
+    )
+    
+    class Meta:
+        verbose_name = _("Product Image")
+        verbose_name_plural = _("Product Images")
+        indexes = [
+            models.Index(fields=['product_content_type', 'product_object_id']),
+        ]

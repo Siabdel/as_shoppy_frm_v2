@@ -1,0 +1,98 @@
+{% load static %}
+{% load cart_tags %}
+
+<nav class="navbar navbar-expand-lg cmagic-navbar sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'cmagic_sport:catalog' %}">
+            <i class="fas fa-shoe-prints me-2"></i>CMagic<span style="color: var(--cmagic-primary)">Sport</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'cmagic_sport:catalog' %}">
+                        <i class="fas fa-home me-1"></i>Accueil
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="brandsDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-tags me-1"></i>Marques
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="brandsDropdown">
+                        <li><a class="dropdown-item" href="?brand=nike">Nike</a></li>
+                        <li><a class="dropdown-item" href="?brand=adidas">Adidas</a></li>
+                        <li><a class="dropdown-item" href="?brand=new_balance">New Balance</a></li>
+                        <li><a class="dropdown-item" href="?brand=puma">Puma</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'cmagic_sport:catalog' %}">Toutes les marques</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="typesDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-running me-1"></i>Types
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="typesDropdown">
+                        <li><a class="dropdown-item" href="?product_type=sneakers">Sneakers</a></li>
+                        <li><a class="dropdown-item" href="?product_type=running">Running</a></li>
+                        <li><a class="dropdown-item" href="?product_type=basketball">Basketball</a></li>
+                        <li><a class="dropdown-item" href="?product_type=football">Football</a></li>
+                        <li><a class="dropdown-item" href="?product_type=training">Training</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'cmagic_sport:catalog' %}?in_stock=true">
+                        <i class="fas fa-box-open me-1"></i>En Stock
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'cmagic_sport:catalog' %}?limited_only=true">
+                        <i class="fas fa-star me-1"></i>Édition Limitée
+                    </a>
+                </li>
+            </ul>
+            
+            <!-- Search Bar -->
+            <form class="search-bar d-none d-lg-flex" action="{% url 'cmagic_sport:catalog' %}" method="get">
+                <input type="text" name="search" placeholder="Rechercher...">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+            
+            <!-- User Menu -->
+            <ul class="navbar-nav ms-3">
+                <li class="nav-item">
+                    <a class="nav-link cart-badge" href="{% url 'cmagic_sport:cart' %}">
+                        <i class="fas fa-shopping-cart fa-lg"></i>
+                        {% get_cart_items_count request as cart_count %}
+                        {% if cart_count > 0 %}
+                        <span class="badge">{{ cart_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% if user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i>{{ user.username }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Mon Profil</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-box me-2"></i>Mes Commandes</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-heart me-2"></i>Favoris</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="fas fa-sign-in-alt me-1"></i>Connexion
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

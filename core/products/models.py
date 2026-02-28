@@ -90,11 +90,12 @@ class BaseProduct(PolymorphicModel):
     """
     
     # Core product fields
+    # Note: Each subclass should override this with a unique related_name
+    # to avoid clashes between different product models
     category = models.ForeignKey(
-        MPCategory, 
-        related_name='products', 
-        null=True, 
-        blank=True, 
+        MPCategory,
+        null=True,
+        blank=True,
         on_delete=models.CASCADE
     )
     name = models.CharField(max_length=100, db_index=True)

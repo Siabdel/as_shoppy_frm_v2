@@ -1,0 +1,468 @@
+{% extends 'cmagic_sport/base.html' %}
+{% load static %}
+
+{% block title %}CMagic Sport - Boutique Baskets & Articles Sport{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-shoe {
+        position: absolute;
+        right: 10%;
+        top: 50%;
+        transform: translateY(-50%) rotate(-15deg);
+        width: 400px;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(-50%) rotate(-15deg) translateY(0); }
+        50% { transform: translateY(-50%) rotate(-15deg) translateY(-20px); }
+    }
+    
+    .featured-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #FF6B00, #FF8C00);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        z-index: 10;
+    }
+    
+    .brand-logos {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 40px;
+        flex-wrap: wrap;
+        padding: 40px 0;
+    }
+    
+    .brand-logos img {
+        height: 40px;
+        opacity: 0.6;
+        transition: all 0.3s ease;
+        filter: grayscale(100%);
+    }
+    
+    .brand-logos img:hover {
+        opacity: 1;
+        filter: grayscale(0%);
+        transform: scale(1.1);
+    }
+    
+    .section-title {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 40px;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 4px;
+        background: var(--cmagic-primary);
+        border-radius: 2px;
+    }
+    
+    .category-card {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        height: 200px;
+        cursor: pointer;
+    }
+    
+    .category-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .category-card:hover img {
+        transform: scale(1.1);
+    }
+    
+    .category-card .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, rgba(0,0,0,0.7) 0%, rgba(255,107,0,0.3) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .category-card h3 {
+        color: white;
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin: 0;
+    }
+    
+    .category-card .count {
+        color: rgba(255,255,255,0.8);
+        font-size: 0.9rem;
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+    
+    .filter-section h5 {
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--cmagic-primary);
+    }
+    
+    .filter-option {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-option:hover {
+        color: var(--cmagic-primary);
+    }
+    
+    .filter-option input {
+        margin-right: 10px;
+        accent-color: var(--cmagic-primary);
+    }
+    
+    .active-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .active-filters .filter-tag {
+        background: var(--cmagic-primary);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .active-filters .filter-tag button {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6" data-aos="fade-right">
+                <span class="badge bg-warning text-dark mb-3 px-3 py-2">
+                    <i class="fas fa-fire me-1"></i> Nouveauté 2024
+                </span>
+                <h1 class="hero-title">
+                    Trouvez Votre<br>
+                    <span>Style Parfait</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Découvrez notre collection exclusive de baskets et articles de sport.
+                    Qualité professionnelle, design moderne, livraison rapide.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="#products" class="btn btn-cmagic">
+                        <i class="fas fa-shopping-bag me-2"></i>Découvrir
+                    </a>
+                    <a href="#categories" class="btn btn-cmagic-outline">
+                        <i class="fas fa-compass me-2"></i>Parcourir
+                    </a>
+                </div>
+                
+                <!-- Stats -->
+                <div class="d-flex gap-5 mt-5">
+                    <div>
+                        <h3 class="text-white fw-bold mb-0">500+</h3>
+                        <small class="text-white-50">Produits</small>
+                    </div>
+                    <div>
+                        <h3 class="text-white fw-bold mb-0">10+</h3>
+                        <small class="text-white-50">Marques</small>
+                    </div>
+                    <div>
+                        <h3 class="text-white fw-bold mb-0">98%</h3>
+                        <small class="text-white-50">Satisfaction</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block" data-aos="fade-left">
+                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600" alt="Nike Shoe" class="hero-shoe">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Brands Bar -->
+<section class="py-4 bg-white">
+    <div class="container">
+        <div class="brand-logos">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_Nike.svg" alt="Nike">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/03/Logo_Adidas.svg" alt="Adidas">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/New_Balance_logo.svg" alt="New Balance">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Puma_Logo.svg" alt="Puma">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Reebok_logo.svg" alt="Reebok">
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5" id="categories">
+    <div class="container">
+        <h2 class="text-center section-title" data-aos="fade-up">Catégories</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                <a href="?product_type=sneakers" class="text-decoration-none">
+                    <div class="category-card">
+                        <img src="https://images.unsplash.com/photo-1556906781-9a412961c28c?w=600" alt="Sneakers">
+                        <div class="overlay">
+                            <div class="text-center">
+                                <h3>Sneakers</h3>
+                                <span class="count">{{ sneaker_count|default:"120+" }} produits</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                <a href="?product_type=running" class="text-decoration-none">
+                    <div class="category-card">
+                        <img src="https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=600" alt="Running">
+                        <div class="overlay">
+                            <div class="text-center">
+                                <h3>Running</h3>
+                                <span class="count">{{ running_count|default:"80+" }} produits</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                <a href="?product_type=basketball" class="text-decoration-none">
+                    <div class="category-card">
+                        <img src="https://images.unsplash.com/photo-1519861531473-92002639313cc?w=600" alt="Basketball">
+                        <div class="overlay">
+                            <div class="text-center">
+                                <h3>Basketball</h3>
+                                <span class="count">{{ basketball_count|default:"45+" }} produits</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Products Section -->
+<section class="py-5 bg-light" id="products">
+    <div class="container">
+        <h2 class="text-center section-title" data-aos="fade-up">Nos Produits</h2>
+        
+        <!-- Filters -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="filter-section">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h5>Marque</h5>
+                            <div class="filter-option">
+                                <input type="checkbox" id="brand-nike" name="brand" value="nike">
+                                <label for="brand-nike">Nike</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="checkbox" id="brand-adidas" name="brand" value="adidas">
+                                <label for="brand-adidas">Adidas</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="checkbox" id="brand-puma" name="brand" value="puma">
+                                <label for="brand-puma">Puma</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <h5>Type</h5>
+                            <div class="filter-option">
+                                <input type="checkbox" id="type-sneakers" name="product_type" value="sneakers">
+                                <label for="type-sneakers">Sneakers</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="checkbox" id="type-running" name="product_type" value="running">
+                                <label for="type-running">Running</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="checkbox" id="type-basketball" name="product_type" value="basketball">
+                                <label for="type-basketball">Basketball</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <h5>Genre</h5>
+                            <div class="filter-option">
+                                <input type="checkbox" id="gender-men" name="gender" value="men">
+                                <label for="gender-men">Homme</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="checkbox" id="gender-women" name="gender" value="women">
+                                <label for="gender-women">Femme</label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="checkbox" id="gender-unisex" name="gender" value="unisex">
+                                <label for="gender-unisex">Unisexe</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <h5>Prix</h5>
+                            <div class="price-input">
+                                <input type="number" placeholder="Min" class="form-control">
+                                <span>-</span>
+                                <input type="number" placeholder="Max" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Products Grid -->
+        <div class="row g-4">
+            {% for product in products %}
+            <div class="col-sm-6 col-lg-4 col-xl-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                <div class="product-card">
+                    <div class="product-image">
+                        {% if product.default_image %}
+                        <img src="{{ product.default_image.url }}" alt="{{ product.name }}">
+                        {% else %}
+                        <img src="https://via.placeholder.com/400x400?text=CMagic+Sport" alt="{{ product.name }}">
+                        {% endif %}
+                        
+                        {% if product.is_season_promo %}
+                        <span class="product-badge sale">-{{ product.season_promo_discount }}%</span>
+                        {% elif product.is_limited_edition %}
+                        <span class="product-badge new">Édition Limitée</span>
+                        {% endif %}
+                        
+                        <div class="product-actions">
+                            <button class="btn-quick-view" data-bs-toggle="modal" data-bs-target="#quickView{{ product.id }}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="product-info">
+                        <div class="product-brand">{{ product.get_brand_display }}</div>
+                        <a href="{% url 'cmagic_sport:product_detail' product.slug %}" class="text-decoration-none">
+                            <h4 class="product-name">{{ product.name }}</h4>
+                        </a>
+                        <div class="product-price">
+                            <span class="current-price">{{ product.get_price|floatformat:2 }} €</span>
+                            {% if product.regular_price and product.regular_price > product.price %}
+                            <span class="old-price">{{ product.regular_price|floatformat:2 }} €</span>
+                            {% endif %}
+                        </div>
+                        <button class="btn btn-cmagic w-100 mt-3 add-to-cart-btn" data-product-id="{{ product.id }}">
+                            <i class="fas fa-shopping-cart me-2"></i>Ajouter au panier
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-shoe-prints fa-4x text-muted mb-3"></i>
+                <h3>Aucun produit trouvé</h3>
+                <p class="text-muted">Essayez de modifier vos filtres de recherche</p>
+                <a href="{% url 'cmagic_sport:catalog' %}" class="btn btn-cmagic">Voir tous les produits</a>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if products.has_other_pages %}
+        <nav class="pagination-cmagic mt-5">
+            {% if products.has_previous %}
+            <a href="?page={{ products.previous_page_number }}"><i class="fas fa-chevron-left"></i></a>
+            {% endif %}
+            
+            {% for num in products.paginator.page_range %}
+                {% if products.number == num %}
+                <span class="current">{{ num }}</span>
+                {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                <a href="?page={{ num }}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}"><i class="fas fa-chevron-right"></i></a>
+            {% endif %}
+        </nav>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4" data-aos="fade-up">
+                <div class="text-center p-4">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-shipping-fast fa-2x text-primary"></i>
+                    </div>
+                    <h4>Livraison Gratuite</h4>
+                    <p class="text-muted mb-0">À partir de 100€ d'achat</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="text-center p-4">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-undo fa-2x text-primary"></i>
+                    </div>
+                    <h4>Retours Gratuits</h4>
+                    <p class="text-muted mb-0">Sous 30 jours</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="text-center p-4">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-headset fa-2x text-primary"></i>
+                    </div>
+                    <h4>Support 24/7</h4>
+                    <p class="text-muted mb-0">À votre service</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

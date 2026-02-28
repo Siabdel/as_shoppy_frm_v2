@@ -1,0 +1,396 @@
+{% extends 'cmagic_sport/base.html' %}
+{% load static %}
+
+{% block title %}Mon Panier - CMagic Sport{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cart-header {
+        background: linear-gradient(135deg, var(--cmagic-secondary) 0%, #2d2d2d 100%);
+        padding: 40px 0;
+        margin-bottom: 40px;
+    }
+    
+    .cart-item {
+        background: #fff;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .cart-item:hover {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .cart-item-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f8f9fa;
+    }
+    
+    .cart-item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .cart-item-details h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .cart-item-details .brand {
+        color: var(--cmagic-gray);
+        font-size: 0.9rem;
+    }
+    
+    .cart-item-details .size {
+        color: var(--cmagic-gray);
+        font-size: 0.85rem;
+    }
+    
+    .cart-item-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--cmagic-primary);
+    }
+    
+    .quantity-input {
+        display: inline-flex;
+        align-items: center;
+        border: 2px solid #ddd;
+        border-radius: 25px;
+        overflow: hidden;
+    }
+    
+    .quantity-input button {
+        width: 35px;
+        height: 35px;
+        border: none;
+        background: #f8f9fa;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .quantity-input button:hover {
+        background: var(--cmagic-primary);
+        color: #fff;
+    }
+    
+    .quantity-input input {
+        width: 50px;
+        text-align: center;
+        border: none;
+        font-weight: 600;
+    }
+    
+    .remove-btn {
+        color: var(--cmagic-danger);
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .remove-btn:hover {
+        transform: scale(1.1);
+    }
+    
+    .cart-summary {
+        background: #fff;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        position: sticky;
+        top: 100px;
+    }
+    
+    .cart-summary h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--cmagic-primary);
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .summary-row.total {
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-top: 25px;
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+    
+    .summary-row.total .amount {
+        color: var(--cmagic-primary);
+        font-size: 1.6rem;
+    }
+    
+    .coupon-form {
+        display: flex;
+        gap: 10px;
+        margin: 20px 0;
+    }
+    
+    .coupon-form input {
+        flex: 1;
+        padding: 12px 15px;
+        border: 2px solid #ddd;
+        border-radius: 25px;
+    }
+    
+    .coupon-form button {
+        padding: 12px 20px;
+        border-radius: 25px;
+    }
+    
+    .empty-cart {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    
+    .empty-cart i {
+        font-size: 5rem;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+    
+    .empty-cart h3 {
+        margin-bottom: 10px;
+    }
+    
+    .empty-cart p {
+        color: var(--cmagic-gray);
+        margin-bottom: 25px;
+    }
+    
+    .continue-shopping {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--cmagic-primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .continue-shopping:hover {
+        gap: 15px;
+    }
+    
+    .cart-features {
+        display: flex;
+        justify-content: space-around;
+        padding: 20px 0;
+        border-top: 1px solid #eee;
+        margin-top: 20px;
+    }
+    
+    .cart-features .feature {
+        text-align: center;
+        color: var(--cmagic-gray);
+        font-size: 0.85rem;
+    }
+    
+    .cart-features .feature i {
+        font-size: 1.5rem;
+        color: var(--cmagic-primary);
+        margin-bottom: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="cart-header">
+    <div class="container">
+        <h1 class="text-white mb-2">
+            <i class="fas fa-shopping-cart me-3"></i>Mon Panier
+        </h1>
+        <p class="text-white-50 mb-0">
+            {% with cart_items|length as count %}
+                {{ count }} produit{{ count|pluralize }} dans votre panier
+            {% endwith %}
+        </p>
+    </div>
+</div>
+
+<!-- Cart Content -->
+<div class="container pb-5">
+    {% if cart_items %}
+    <div class="row g-5">
+        <!-- Cart Items -->
+        <div class="col-lg-8">
+            {% for item in cart_items %}
+            <div class="cart-item" data-item-id="{{ item.id }}">
+                <div class="row align-items-center">
+                    <div class="col-md-2">
+                        <div class="cart-item-image">
+                            {% if item.product.default_image %}
+                            <img src="{{ item.product.default_image.url }}" alt="{{ item.product.name }}">
+                            {% else %}
+                            <img src="https://via.placeholder.com/120x120?text=CMagic" alt="{{ item.product.name }}">
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="cart-item-details">
+                            <h4>{{ item.product.name }}</h4>
+                            <div class="brand">{{ item.product.get_brand_display }}</div>
+                            {% if item.size %}
+                            <div class="size">Taille: {{ item.size }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="cart-item-price">
+                            {{ item.get_total_price|floatformat:2 }} €
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="quantity-input">
+                            <button onclick="updateQuantity('{{ item.id }}', -1)">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" 
+                                   onchange="setQuantity('{{ item.id }}', this.value)">
+                            <button onclick="updateQuantity('{{ item.id }}', 1)">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-1 text-end">
+                        <button class="remove-btn" onclick="removeItem('{{ item.id }}')">
+                            <i class="fas fa-trash fa-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <a href="{% url 'cmagic_sport:catalog' %}" class="continue-shopping">
+                <i class="fas fa-arrow-left"></i>Continuer mes achats
+            </a>
+        </div>
+        
+        <!-- Cart Summary -->
+        <div class="col-lg-4">
+            <div class="cart-summary">
+                <h3>Récapitulatif</h3>
+                
+                <div class="summary-row">
+                    <span>Sous-total</span>
+                    <span>{{ cart.get_subtotal|floatformat:2 }} €</span>
+                </div>
+                
+                <div class="summary-row">
+                    <span>Livraison</span>
+                    <span>
+                        {% if cart.get_subtotal >= 100 %}
+                        <span class="text-success">Gratuite</span>
+                        {% else %}
+                        9.90 €
+                        {% endif %}
+                    </span>
+                </div>
+                
+                {% if cart.discount > 0 %}
+                <div class="summary-row">
+                    <span>Réduction</span>
+                    <span class="text-success">-{{ cart.discount|floatformat:2 }} €</span>
+                </div>
+                {% endif %}
+                
+                <div class="summary-row">
+                    <span>TVA</span>
+                    <span>{{ cart.get_tax|floatformat:2 }} €</span>
+                </div>
+                
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span class="amount">{{ cart.get_total|floatformat:2 }} €</span>
+                </div>
+                
+                <!-- Coupon -->
+                <div class="coupon-form">
+                    <input type="text" placeholder="Code promo">
+                    <button class="btn btn-outline-secondary">Appliquer</button>
+                </div>
+                
+                <!-- Checkout Button -->
+                <a href="{% url 'cmagic_sport:checkout' %}" class="btn btn-cmagic w-100 mb-3">
+                    <i class="fas fa-lock me-2"></i>Passer la commande
+                </a>
+                
+                <!-- Features -->
+                <div class="cart-features">
+                    <div class="feature">
+                        <i class="fas fa-shipping-fast"></i>
+                        <div>Livraison gratuite</div>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-undo"></i>
+                        <div>30 jours</div>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-shield-alt"></i>
+                        <div>Sécurisé</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Empty Cart -->
+    <div class="empty-cart">
+        <i class="fas fa-shopping-cart"></i>
+        <h3>Votre panier est vide</h3>
+        <p>Découvrez notre collection de baskets et articles de sport</p>
+        <a href="{% url 'cmagic_sport:catalog' %}" class="btn btn-cmagic">
+            <i class="fas fa-shopping-bag me-2"></i>Découvrir nos produits
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateQuantity(itemId, change) {
+        // In a real app, this would make an AJAX call
+        showToast('Quantité mise à jour', 'success');
+    }
+    
+    function setQuantity(itemId, value) {
+        if (value < 1) {
+            value = 1;
+        }
+        // In a real app, this would make an AJAX call
+        showToast('Quantité mise à jour', 'success');
+    }
+    
+    function removeItem(itemId) {
+        if (confirm('Voulez-vous vraiment supprimer ce produit ?')) {
+            // In a real app, this would make an AJAX call
+            showToast('Produit supprimé', 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
+    }
+</script>
+{% endblock %}

@@ -87,7 +87,9 @@ INSTALLED_APPS = [
     #'immoshopy.apps.ImmoshopyConfig', # Immobilier
     #'autocar.apps.AutoCarConfig', # Autocar
     'product.apps.ProductConfig', # Product
-    'shop.apps.ShopConfig', # Shop - CMagic Sport Cart
+    'shop.apps.ShopConfig',  # Shop - CMagic Sport Cart
+    # CMagic Sport - Boutique baskets
+    'cmagic_sport',
     
 ]
 
